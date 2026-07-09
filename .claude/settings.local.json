@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(& \"C:\\\\sofeware\\\\Miniforge3\\\\envs\\\\RL\\\\python.exe\" run_experiment.py train --logdir ./logs_dir/vacuum_test --env vacuum --num_procs 2 --n_itr 2 --input_norm_steps 2000 2>&1)"
+    ]
+  }
+}

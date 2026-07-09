@@ -1,0 +1,47 @@
+
+验证仿真指令
+python scripts/debug_stepper.py --path experiments/jvcr_run_arm   
+
+训练指令
+python run_experiment.py train --logdir ./logs_dir/jvrc_walk--num_procs 6 --env jvrc_walk 
+
+python run_experiment.py train --logdir ./logs_dir/test --num_procs 6 --env jvrc_walk --n_itr 20
+
+在服务器上训练，可以使用tmux，这样电脑关闭也不会影响服务器训练 （核更改为32）
+python run_experiment.py train --logdir ./logs_dir/jvrc_walk--num_procs 32 --env jvrc_walk 
+
+
+这个是电脑关闭也不会影响服务器训练，但是训练过程中不会在终端打印信息，而是全部保存到train.log
+nohup python run_experiment.py train --logdir ./logs_dir/jvrc_walk --num_procs 32 --env jvrc_walk > train.log 2>&1 &  
+
+想看实时输出时，不想看了按 Ctrl+C 退出 tail(训练不受影响)
+tail -f train.log
+
+
+==================== 扫地机器人 过坎/脱困 (env = vacuum) ====================
+说明：差速圆盘底盘，轮力矩控制。场景含 平地/过坎/骑坎打滑脱困/顶障倒车脱困，
+随训练迭代自动做难度课程（门槛逐步抬高）。本机训练用 conda 环境 RL (py3.7)。
+
+训练：
+conda activate RL
+python run_experiment.py train --logdir ./logs_dir/vacuum --num_procs 6 --env vacuum
+
+服务器后台训练（关机不影响）：
+nohup python run_experiment.py train --logdir ./logs_dir/vacuum --num_procs 32 --env vacuum > train_vacuum.log 2>&1 &
+
+回放/可视化（--mode 可锁定 flat/cross/highcenter/against 单独检验某项能力）：
+python scripts/debug_vacuum.py --path logs_dir/vacuum
+python scripts/debug_vacuum.py --path logs_dir/vacuum --mode highcenter
+python scripts/debug_vacuum.py --path logs_dir/vacuum --mode cross 
+
+
+
+# 训练（约 1500 迭代 ≈ 10.8M 步）
+$env:PYTHONPATH="."; conda run -n RL python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf --n_itr 1500 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50
+
+# 回放：随机墙课程
+python scripts/debug_wallfollow.py --path experiments/vacuum_wf
+
+# 回放：家居场景（策略从未见过该户型 → 泛化验证）
+python scripts/debug_wallfollow.py --path experiments/vacuum_wf --home
+
