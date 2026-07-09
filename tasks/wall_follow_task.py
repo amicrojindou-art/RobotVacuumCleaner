@@ -11,7 +11,9 @@
      12~45cm 处（"找墙"课程——先接近、捕获墙面再贴边，这是策略能在
      陌生户型里从任意位置启动的关键）。找墙回合里又有 50% 是"正对墙面"
      出生（head_on），必须靠前向激光把速度降到 0、停在墙前 ~1cm 再转向对齐，
-     而不是撞上去；
+     而不是撞上去；其余找墙回合中另有一部分"全盲出生"（任意朝向、更远
+     距离，激光量程内可能长时间无任何回波——对应家居场景任意位置任意
+     朝向启动），期望行为是不打转、径直巡航直到捕获墙面；
   3) 传感器噪声：激光测距高斯噪声随课程升到 ~2mm；
   4) 地面摩擦随机化。
 
@@ -33,7 +35,17 @@
     就【保持直行匀速穿过缺口】、几乎不罚丢墙，并压住偏航（别拐进缺口）；
     到对侧自然重新贴墙。与"外角包边"用真值区分：外角前方没有共线墙，
     仍走原来的包边逻辑。没有这一项，策略把缺口误当外角/丢墙 —— 中途减速、
-    原地转向、重新找墙，沿边作业被打断（本次修复的核心缺陷）。
+    原地转向、重新找墙，沿边作业被打断。缺口宽度上限压在 0.35m：必须明显
+    小于家居门洞宽度（0.6~0.9m），门洞才会被判成"外角拐入"而不是被直行
+    桥接跳过；
+  - 找墙巡航（seek）防打转：本回合尚未捕获过墙且激光全盲时，给径直巡航
+    更高的速度分、并惩罚偏航角速度。10cm 量程下原地旋转毫无侦察价值，
+    家居场景出生后原地转圈的根因就是盲区里"转圈"与"直行"奖励几乎无差；
+  - 墙端 U 型包边（门洞侧柱）课程：部分段间过渡改为"下一段贴同一堵墙的
+    背面反向延伸、端面对齐"，机器人到墙端后需连做两个左外角（合计≈180°）
+    绕过墙端、再沿背面继续贴边 —— 对应家居场景"沿隔断走到门洞侧柱、
+    拐进里屋继续沿墙"。此前课程只有 55°~115° 单拐角，策略在门洞侧柱处
+    不会包边、原地打转甩出。
 
 终止：翻车 / 弹飞 / 出界 / 持续蹭墙 / 丢墙超时（首次捕获前有更长宽限；
       正在桥接缺口时不按丢墙终止）。
@@ -59,8 +71,12 @@ class WallFollowTask(object):
     # 训练"直行桥接穿过"。宽度随课程展开；太宽会与外角越来越难区分（同一段
     # 激光观测下"缺口"与"外角"前 gap 距离内不可分），故上限保守。
     GAP_MIN = 0.12           # 缺口最小宽度 (m)
-    GAP_MAX_BASE = 0.20      # 缺口最大宽度基线，随课程升到 +0.35 -> 0.55m
+    # 缺口最大宽度基线，随课程升到 +0.15 -> 0.35m。上限必须明显小于家居
+    # 门洞宽度（0.6~0.9m）：桥接课程教的是"这个宽度以内直行跨过"，若上限
+    # 逼近门洞宽度，策略会把门洞当缺口直行桥接、永远不拐进里屋。
+    GAP_MAX_BASE = 0.20
     GAP_PROB = 0.35          # 每个共线段边界插入缺口的概率
+    U_TURN_PROB = 0.25       # 段间过渡为"墙端 U 型包边"（门洞侧柱课程）的概率
     GAP_BRIDGE_LAT = 0.35    # 判定"正在桥接该缺口"的最大横向偏离 (m)
     GAP_BRIDGE_HEAD = 0.6    # 判定桥接的最小航向·墙向余弦（须朝墙向直行）
     WALL_HALF_T = 0.08       # 训练墙半厚度（厚墙 + 硬接触，防止大力顶穿）
@@ -228,6 +244,12 @@ class WallFollowTask(object):
             # 原地转向、重新找墙。与外角包边用真值区分（外角前方没有共线墙）。
             progress *= 1.0
             lost *= 0.15
+        elif not self.acquired:
+            # 找墙巡航（seek）：本回合还从未捕获过墙、激光全盲。给径直巡航
+            # 明显高于旧值 0.2 的速度分，配合下方 wobble 的 seek 门控惩罚
+            # 原地打转 —— 家居场景出生后原地转圈的根因是盲区里"转圈"与
+            # "直行"的奖励几乎无差（转圈不吃任何罚、直行只多 0.2 档速度分）。
+            progress *= 0.5
         elif self.lost_time < self.WRAP_GRACE_TIME and front_clear:
             # 阳角（外角）包边窗口：左墙"刚"丢 + 正前方无障碍 —— 典型外角信号。
             # 此时鼓励【先直行越过墙角】、并减轻丢墙焦虑，避免策略急着左勾
@@ -273,6 +295,14 @@ class WallFollowTask(object):
             steady = track
         elif self.bridging:
             steady = 1.0
+        elif not self.acquired:
+            # 找墙巡航防打转：全盲时旋转对 10cm 量程的激光毫无侦察价值，
+            # 惩罚偏航角速度，让"出生即直行找墙"成为唯一高收益行为。
+            # 门控 0.6：轻微弧线巡航（|yaw_rate|~0.25rad/s）罚 ~0.01/步、
+            # 几乎无感，原地打转（>0.6rad/s 封顶）罚 0.06/步、明显亏损。
+            # 正对墙刹停后的原地转向对齐不受影响 —— 那时 front 有回波，
+            # 已被第一个分支放开。
+            steady = 0.6
         else:
             steady = 0.0
         wobble = steady * min((self.yaw_rate / self.YAW_RATE_SCALE) ** 2, 1.0)
@@ -366,6 +396,7 @@ class WallFollowTask(object):
         # ——这是家居场景"直接撞墙再沿墙"的针对性纠正。
         far_spawn = (frac > 0.1) and (np.random.rand() < 0.35)
         head_on = far_spawn and (np.random.rand() < 0.50)
+        blind = far_spawn and (not head_on) and (np.random.rand() < 0.40)
         if far_spawn:
             if head_on:
                 # yaw≈+90° 正对左侧墙面（更宽的偏航，覆盖更多斜向接近）。必须靠
@@ -374,6 +405,14 @@ class WallFollowTask(object):
                 # 必须立刻刹车（最强的刹车梯度）；更远的先巡航、进 10cm 再刹。
                 d0 = np.random.uniform(0.08, 0.35)
                 start_yaw = np.pi / 2.0 + np.random.uniform(-0.6, 0.5)
+            elif blind:
+                # 全盲找墙（家居场景出生分布）：任意朝向、更远距离，激光量程内
+                # 长时间无任何回波。期望行为：不打转、径直巡航（seek 速度分 +
+                # 防打转罚），直到某个方向撞进 10cm 量程再刹车/贴边。朝向背离
+                # 墙的回合会被 ACQUIRE_GRACE 超时截断 —— 全盲下本就不存在
+                # "更聪明"的策略，学到"睁眼一片黑就直走"即达标。
+                d0 = np.random.uniform(0.20, 0.60)
+                start_yaw = np.random.uniform(-np.pi, np.pi)
             else:
                 d0 = np.random.uniform(0.12, 0.45)
                 start_yaw = np.random.uniform(-0.5, 0.5)
@@ -388,9 +427,12 @@ class WallFollowTask(object):
         np.random.shuffle(names)
         order = [first] + names
 
-        # 缺口课程：热身后（frac>0.15）才在共线段之间插缺口，宽度随课程展开。
+        # 缺口课程：热身后（frac>0.15）才在共线段之间插缺口，宽度随课程展开
+        # 到 0.35m 封顶（见 GAP_MAX_BASE 注释：必须与门洞宽度拉开差距）。
         gaps_on = frac > 0.15
-        gap_max = self.GAP_MAX_BASE + 0.35 * frac
+        gap_max = self.GAP_MAX_BASE + 0.15 * frac
+        # 墙端 U 型包边课程：拐角热身后（frac>0.25）开启。
+        uturn_on = frac > 0.25
 
         p = np.array([-0.4, 0.175 + d0])    # 墙内侧面折线起点（机器人左侧）
         d = np.array([1.0, 0.0])            # 墙走向
@@ -420,7 +462,7 @@ class WallFollowTask(object):
             self._mocap_place(name, [center[0], center[1], h - hz], seg_yaw)
             self.course.append((center.copy(), L, h, seg_yaw))
 
-            # ---- 段间过渡：缺口（共线续墙）或拐角，二选一 ----
+            # ---- 段间过渡：缺口（共线续墙）/ 墙端 U 型包边 / 拐角，三选一 ----
             p = seg_start + d * L
             prev_gap = False
             if gaps_on and i < n_seg - 1 and np.random.rand() < self.GAP_PROB:
@@ -429,6 +471,15 @@ class WallFollowTask(object):
                 self.gaps.append((p.copy(), d.copy(), g))
                 p = p + d * g
                 prev_gap = True
+            elif uturn_on and i < n_seg - 1 and np.random.rand() < self.U_TURN_PROB:
+                # 墙端 U 型包边（门洞侧柱课程）：下一段贴着同一堵墙的【背面】
+                # 反向延伸、端面与本段对齐（跨过 2×半厚），机器人到墙端后需
+                # 连做两个左外角（合计≈180°）绕过墙端、再沿背面继续贴边 ——
+                # 正是家居场景"沿隔断走到门洞侧柱、拐进里屋"的动作。
+                # 训练墙厚 16cm、家居隔断 5cm，包边窗口逻辑一致，可泛化。
+                p = p + normal * (2.0 * ht)
+                d = -d
+                prev_gap = True   # 端面已对齐，下一段不做拐角回收（同缺口逻辑）
             else:
                 # 拐角：前期固定 90°，后期 55°~115°；负角=内角（墙折向机器人前方）
                 ang = np.pi / 2 if frac < 0.3 else np.radians(np.random.uniform(55.0, 115.0))
