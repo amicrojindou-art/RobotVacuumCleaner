@@ -64,14 +64,21 @@ import transforms3d as tf3
 class WallFollowTask(object):
     # ---- 任务超参数 ----
     TARGET_DIST = 0.01       # 贴边目标：机身左边缘距墙 1cm
-    V_DES = 0.15             # 期望沿墙速度 (m/s)
+    # 期望沿墙/巡航速度 (m/s)。帐篷速度分的峰值就是训练出的巡航速度：
+    # 0.15 版重训后实测偏慢（用户要求保持 0.24~0.34 巡航带），提到 0.28 ——
+    # 带宽 0.24~0.32 内速度分 >=0.86，峰值居中；超过 0.34 开始明显扣分、
+    # 2×V_DES=0.56 归零。代价是 10cm 量程下反应时间更短（~0.33s），贴边
+    # 振荡与拐角冲过量会比 0.15 版大，由 wobble/scrape/approach 项约束。
+    V_DES = 0.28
     MAX_TAU = 2.0            # 力矩上限（归一化用，与 XML 一致）
     FRONT_SAFE_DIST = 0.09   # 正前方开始减速的距离（≈激光量程；防撞墙）
     FRONT_STOP_GAP  = 0.01   # 期望停墙间距：正前方 1cm 处前向速度应降到 0
     YAW_RATE_SCALE = 0.6     # 抖动抑制归一化尺度 (rad/s)，由实测 yaw_rate 分布标定
     # 阳角包边宽限窗口 (s)：左侧激光装在机体横向中心线(x=0)上，丢墙那一刻墙角
     # 正好在机身正侧方，要把墙角甩到机身后方需再前进约一个底盘半径
-    # （0.175m / V_DES 0.15 ≈ 1.17s）。窗口太短会逼策略提前左勾、勾住墙角。
+    # （0.175m，V_DES=0.28 下 ≈0.63s；窗口 1.2s 留 ~2 倍余量，覆盖拐角处
+    # 减速的情况）。窗口太短会逼策略提前左勾、勾住墙角；窗口只是"不重罚"
+    # 的上限，不强迫直行满窗口。
     WRAP_GRACE_TIME = 1.2
     # 墙体缺口（门洞/断墙）课程：连续墙上留一段两端共线、中间无墙的缺口，
     # 训练"直行桥接穿过"。宽度随课程展开；太宽会与外角越来越难区分（同一段
@@ -243,8 +250,8 @@ class WallFollowTask(object):
                         self.world_vel_xy[1] * np.sin(yaw))
         # 速度分改为在 V_DES 处封顶的"帐篷"形：fwd=V_DES 拿满分、超速线性扣回、
         # 2×V_DES 归零、更快为负。旧 clip 形在 V_DES 饱和、超速零代价，实测
-        # 策略沿墙巡航到 2×V_DES（0.24~0.34m/s）：10cm 量程激光只剩 <0.3s
-        # 反应时间，贴边振荡/丢墙/撞墙全被放大，也让"高速螺旋找墙"净收益为正。
+        # 策略巡航到 2× 旧V_DES 也不吃任何罚 —— 速度彻底失控，且让"高速螺旋
+        # 找墙"净收益为正。帐篷峰值 = 训练出的巡航速度（现 0.28，见 V_DES 注释）。
         # fwd<=V_DES 一侧与旧公式完全一致，不影响刹车/慢速接近的既有梯度。
         progress = np.clip(min(fwd_vel, 2.0 * self.V_DES - fwd_vel) / self.V_DES,
                            -1.0, 1.0)
@@ -356,8 +363,9 @@ class WallFollowTask(object):
         pos, (roll, pitch, yaw), up_z = self._base_pose()
         lost_limit = self.ACQUIRE_GRACE if not self.acquired else self.LOST_TERM_TIME
         if self.home_scene:
-            # 家居回放宽限 ×4（原 ×2）：从基站到隔断的全盲直行 ~2.4m，按
-            # V_DES 0.15m/s 要 ~16s，×2（16s）会在即将到墙前误杀回合。
+            # 家居回放宽限 ×4（原 ×2）：从基站到隔断的全盲直行 ~2.4m
+            # （V_DES=0.28 下 ~9s），×4 给"起步慢/弧线巡航"留足余量，
+            # 避免在即将到墙前误杀回合。
             lost_limit *= 4.0
         conditions = {
             "flipped": (up_z < 0.4) or (abs(roll) > 1.0) or (abs(pitch) > 1.2),
@@ -446,8 +454,8 @@ class WallFollowTask(object):
                 # 墙的回合会被 ACQUIRE_GRACE 超时截断 —— 全盲下本就不存在
                 # "更聪明"的策略，学到"睁眼一片黑就直走"即达标。
                 # 上限 0.60 -> 1.00m：家居从基站到隔断要全盲直行 ~2.4m，训练
-                # 里必须见过"长时间全盲仍坚持直行"的时段（V_DES 0.15m/s 下
-                # 1m ≈ 7s，逼近 8s 找墙宽限，更远的朝向差回合自然被截断）。
+                # 里必须见过"长时间全盲仍坚持直行"的时段（V_DES 0.28m/s 下
+                # 1m ≈ 3.6s；朝向背墙的回合仍由 8s 找墙宽限截断）。
                 d0 = np.random.uniform(0.20, 1.00)
                 start_yaw = np.random.uniform(-np.pi, np.pi)
             else:
