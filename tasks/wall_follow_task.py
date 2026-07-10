@@ -19,7 +19,10 @@
 
 奖励设计要点（防局部最优 / 防三类坏行为）：
   - progress（沿墙推进）用贴边质量门控：|d-1cm| 越差，速度分越少。
-    否则"斜压在墙上滑行"能白拿满速度分，成为强局部最优；
+    否则"斜压在墙上滑行"能白拿满速度分，成为强局部最优；速度分本身是
+    在 V_DES 处封顶的"帐篷"形——超速线性扣回、2×V_DES 归零、更快为负：
+    旧 clip 形超速零代价，策略实际巡航到 2×V_DES，10cm 量程下反应时间
+    减半，贴边振荡/丢墙/撞墙全被放大；
   - 蹭墙（机身接触）重罚，且持续接触 1.5s 直接终止 episode——
     把"贴墙推着走/顶进墙角"这条捷径彻底封死；
   - approach（前向安全 / "距墙 1cm 停住"）：由前向距离定一条前向限速——1cm 处
@@ -38,9 +41,12 @@
     原地转向、重新找墙，沿边作业被打断。缺口宽度上限压在 0.35m：必须明显
     小于家居门洞宽度（0.6~0.9m），门洞才会被判成"外角拐入"而不是被直行
     桥接跳过；
-  - 找墙巡航（seek）防打转：本回合尚未捕获过墙且激光全盲时，给径直巡航
-    更高的速度分、并惩罚偏航角速度。10cm 量程下原地旋转毫无侦察价值，
-    家居场景出生后原地转圈的根因就是盲区里"转圈"与"直行"奖励几乎无差；
+  - 找墙巡航（seek）防打转：激光全盲时（首次找墙、或捕获后丢墙超过包边
+    宽限的"丢墙重找"——两者同治）给径直巡航更高的速度分、并惩罚偏航
+    角速度（盲区专用的更高饱和上限，保证高速打转仍有梯度可下降）。
+    10cm 量程下原地旋转毫无侦察价值，家居场景"出生打转 / 丢墙后打转
+    甩出"的根因就是盲区里"转圈"与"直行"奖励几乎无差、且旧防打转罚
+    在 0.6rad/s 就饱和（实测策略以 2.5~3rad/s 打转，罚被速度分淹没）；
   - 墙端 U 型包边（门洞侧柱）课程：部分段间过渡改为"下一段贴同一堵墙的
     背面反向延伸、端面对齐"，机器人到墙端后需连做两个左外角（合计≈180°）
     绕过墙端、再沿背面继续贴边 —— 对应家居场景"沿隔断走到门洞侧柱、
@@ -235,7 +241,14 @@ class WallFollowTask(object):
         #    只能拿 ~一半，再叠加蹭墙重罚后净收益为负，封死局部最优。
         fwd_vel = float(self.world_vel_xy[0] * np.cos(yaw) +
                         self.world_vel_xy[1] * np.sin(yaw))
-        progress = np.clip(fwd_vel / self.V_DES, -1.0, 1.0)
+        # 速度分改为在 V_DES 处封顶的"帐篷"形：fwd=V_DES 拿满分、超速线性扣回、
+        # 2×V_DES 归零、更快为负。旧 clip 形在 V_DES 饱和、超速零代价，实测
+        # 策略沿墙巡航到 2×V_DES（0.24~0.34m/s）：10cm 量程激光只剩 <0.3s
+        # 反应时间，贴边振荡/丢墙/撞墙全被放大，也让"高速螺旋找墙"净收益为正。
+        # fwd<=V_DES 一侧与旧公式完全一致，不影响刹车/慢速接近的既有梯度。
+        progress = np.clip(min(fwd_vel, 2.0 * self.V_DES - fwd_vel) / self.V_DES,
+                           -1.0, 1.0)
+        seek_blind = False    # 盲区巡航找墙状态（首次找墙 / 丢墙重找），联动 wobble
         if left.hit:
             progress *= (0.25 + 0.75 * track)
         elif self.bridging:
@@ -250,6 +263,7 @@ class WallFollowTask(object):
             # 原地打转 —— 家居场景出生后原地转圈的根因是盲区里"转圈"与
             # "直行"的奖励几乎无差（转圈不吃任何罚、直行只多 0.2 档速度分）。
             progress *= 0.5
+            seek_blind = True
         elif self.lost_time < self.WRAP_GRACE_TIME and front_clear:
             # 阳角（外角）包边窗口：左墙"刚"丢 + 正前方无障碍 —— 典型外角信号。
             # 此时鼓励【先直行越过墙角】、并减轻丢墙焦虑，避免策略急着左勾
@@ -257,7 +271,13 @@ class WallFollowTask(object):
             progress *= 0.6
             lost *= 0.3
         else:
-            progress *= 0.2   # 真·找墙（长时间无墙）
+            # 丢墙重找：捕获过墙、但丢墙已超过包边宽限 —— 与首次找墙（seek）
+            # 同治：径直巡航找墙 + 防打转。旧版此分支 progress×0.2 且 wobble
+            # 门控为 0，丢墙后打转零代价 —— 家居场景"沿墙一段后丢墙 → 以
+            # 3~4rad/s 高速打转甩出"的直接来源（训练课程里丢墙段短、分布内
+            # 总能很快重捕获，把这个洞掩盖了）。
+            progress *= 0.5
+            seek_blind = True
 
         # 3) 前向安全（"距墙 1cm 停住"）：把它写成一条【由前向距离决定的前向限速】——
         #    正前方障碍在 FRONT_STOP_GAP(1cm) 处允许前向速度=0、在 FRONT_SAFE_DIST(9cm)
@@ -290,22 +310,26 @@ class WallFollowTask(object):
         #    桥接缺口时左侧无读数（track=0），但仍要压住偏航防止拐进缺口，
         #    故此时用满门控（steady=1）惩罚偏航，逼机器人直行穿过。
         if not front_clear:
-            steady = 0.0
+            steady, wob_cap = 0.0, 1.0
         elif left.hit:
-            steady = track
+            steady, wob_cap = track, 1.0
         elif self.bridging:
-            steady = 1.0
-        elif not self.acquired:
-            # 找墙巡航防打转：全盲时旋转对 10cm 量程的激光毫无侦察价值，
-            # 惩罚偏航角速度，让"出生即直行找墙"成为唯一高收益行为。
-            # 门控 0.6：轻微弧线巡航（|yaw_rate|~0.25rad/s）罚 ~0.01/步、
-            # 几乎无感，原地打转（>0.6rad/s 封顶）罚 0.06/步、明显亏损。
+            steady, wob_cap = 1.0, 1.0
+        elif seek_blind:
+            # 盲区巡航（首次找墙 / 丢墙重找）防打转：全盲时旋转对 10cm 量程
+            # 的激光毫无侦察价值，惩罚偏航角速度，让"径直巡航"成为唯一高收益
+            # 行为。门控 0.6：轻微弧线巡航（|yaw_rate|~0.25rad/s）罚 ~0.01/步、
+            # 几乎无感。饱和上限放宽到 4.0 —— 旧上限 1.0 在 0.6rad/s 就饱和：
+            # 实测重训后的策略以 2.5~3rad/s 螺旋打转，罚封顶只有 -0.06/步、
+            # 被螺旋推进的 progress +0.13 净淹没，且饱和区对"转多快"零梯度，
+            # 防打转形同虚设。现在 1.2rad/s 才饱和、打转封顶罚 -0.24/步，
+            # 配合帐篷速度分（超速为负），"直行巡航"严格占优。
             # 正对墙刹停后的原地转向对齐不受影响 —— 那时 front 有回波，
             # 已被第一个分支放开。
-            steady = 0.6
+            steady, wob_cap = 0.6, 4.0
         else:
-            steady = 0.0
-        wobble = steady * min((self.yaw_rate / self.YAW_RATE_SCALE) ** 2, 1.0)
+            steady, wob_cap = 0.0, 1.0
+        wobble = steady * min((self.yaw_rate / self.YAW_RATE_SCALE) ** 2, wob_cap)
 
         # 7) 能耗 / 平滑
         energy = np.mean(np.square(prev_torque)) / (self.MAX_TAU ** 2)
@@ -332,7 +356,9 @@ class WallFollowTask(object):
         pos, (roll, pitch, yaw), up_z = self._base_pose()
         lost_limit = self.ACQUIRE_GRACE if not self.acquired else self.LOST_TERM_TIME
         if self.home_scene:
-            lost_limit *= 2.0
+            # 家居回放宽限 ×4（原 ×2）：从基站到隔断的全盲直行 ~2.4m，按
+            # V_DES 0.15m/s 要 ~16s，×2（16s）会在即将到墙前误杀回合。
+            lost_limit *= 4.0
         conditions = {
             "flipped": (up_z < 0.4) or (abs(roll) > 1.0) or (abs(pitch) > 1.2),
             "launched": (pos[2] > 0.45) or (pos[2] < -0.05),
@@ -369,9 +395,15 @@ class WallFollowTask(object):
         if self.home_scene:
             self._bury_all_boxes()
             self.course = []
-            spawns = [(-0.6, 0.0), (0.5, 0.5), (1.2, -0.5), (0.0, -0.8)]
-            x, y = spawns[np.random.randint(len(spawns))]
-            self.robot_init = (x, y, 0.05, np.random.uniform(-np.pi, np.pi))
+            # 出生在回充基站正前方、紧贴 8mm 底板前缘（底板前伸到 x=-0.835，
+            # 机身后缘留 2cm：x = -0.835 + 0.175 + 0.02）。
+            # 不能骑在底板上出生：底板宽 26cm < 轮距 30cm，机器人在底板上时
+            # 前/后万向球压板把机身架起、两驱动轮悬空失去抓地 —— 实测满力矩
+            # 前进/原地转 2s 位移与偏航都是 0（高位架空死局），这正是"出生后
+            # 困在基站附近几秒、然后暴力甩出"的根因。
+            # 朝向 +x 背离基站（基站靠西墙）驶出，±0.15rad 微扰覆盖真机出站
+            # 的朝向误差；出生即刻就能满抓地直行找墙。
+            self.robot_init = (-0.64, 0.70, 0.05, np.random.uniform(-0.15, 0.15))
         else:
             self._build_random_course(frac)
 
@@ -396,7 +428,9 @@ class WallFollowTask(object):
         # ——这是家居场景"直接撞墙再沿墙"的针对性纠正。
         far_spawn = (frac > 0.1) and (np.random.rand() < 0.35)
         head_on = far_spawn and (np.random.rand() < 0.50)
-        blind = far_spawn and (not head_on) and (np.random.rand() < 0.40)
+        # 全盲出生占比 0.40 -> 0.60（约 10.5% 的回合）：家居场景从基站出发
+        # 就是全盲状态，且丢墙重找（新奖励分支）复用同一巡航技能，加大采样。
+        blind = far_spawn and (not head_on) and (np.random.rand() < 0.60)
         if far_spawn:
             if head_on:
                 # yaw≈+90° 正对左侧墙面（更宽的偏航，覆盖更多斜向接近）。必须靠
@@ -411,7 +445,10 @@ class WallFollowTask(object):
                 # 防打转罚），直到某个方向撞进 10cm 量程再刹车/贴边。朝向背离
                 # 墙的回合会被 ACQUIRE_GRACE 超时截断 —— 全盲下本就不存在
                 # "更聪明"的策略，学到"睁眼一片黑就直走"即达标。
-                d0 = np.random.uniform(0.20, 0.60)
+                # 上限 0.60 -> 1.00m：家居从基站到隔断要全盲直行 ~2.4m，训练
+                # 里必须见过"长时间全盲仍坚持直行"的时段（V_DES 0.15m/s 下
+                # 1m ≈ 7s，逼近 8s 找墙宽限，更远的朝向差回合自然被截断）。
+                d0 = np.random.uniform(0.20, 1.00)
                 start_yaw = np.random.uniform(-np.pi, np.pi)
             else:
                 d0 = np.random.uniform(0.12, 0.45)

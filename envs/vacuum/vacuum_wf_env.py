@@ -109,6 +109,11 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         prev_action = self.robot.prev_action
         if prev_action is None:
             prev_action = np.zeros(len(self.actuators))
+        # 限幅到 ±1：|action|>1 后力矩已被 ctrlrange 饱和（torque_scale=2、
+        # ctrlrange ±2），更大的动作值对动力学无意义；不限幅时越界动作会
+        # 通过观测正反馈自激（家居回放实测动作跑飞到 ±20，观测严重出分布，
+        # 策略输出全频抖动）。
+        prev_action = np.clip(prev_action, -1.0, 1.0)
 
         robot_state = np.concatenate([
             root_orient,        # 4
