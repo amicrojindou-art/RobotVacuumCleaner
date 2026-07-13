@@ -42,6 +42,23 @@
     原地转向、重新找墙，沿边作业被打断。缺口宽度上限压在 0.35m：必须明显
     小于家居门洞宽度（0.6~0.9m），门洞才会被判成"外角拐入"而不是被直行
     桥接跳过；
+  - 贴边分"在干活才发"（防缺口往复 / 内角驻留两类白拿 track 的局部最优）：
+    0713 版实测暴露同族两个坑 —— ① 缺口处：一越过近端激光丢墙，track 从
+    ~0.28 突然掉 0（奖励悬崖），而满幅倒车半步就能重新拿回激光回波，倒车段
+    track(+0.28) 与倒车 progress 罚(-0.26) 几乎相抵、净亏≈0，"前进丢墙→
+    倒车找回→再前进"的往复极限环收益反超直行桥接，策略在缺口边缘困死；
+    ② 内角处：刹停后驻留（fwd≈0、不转向）每步白拿 track+upright≈0.33 且
+    零支出（wobble 被 front.hit 门控关掉、approach 不动不罚），9/9 个抵达
+    内角的回合全部停死在角落、毫无转向动机。三手修复：
+      a) 桥接时用课程真值把原墙线"延长"进缺口，按贴墙同一公式发
+         【虚拟贴边分】—— track 与 progress 门控跨缺口完全连续，
+         直行穿越与贴墙直行等值，奖励悬崖消失；
+      b) 倒车（fwd<0）按比例扣发贴边分、-0.06m/s 起全扣 —— 掐掉往复
+         循环唯一的收入来源；墙端/外角/U 型包边处的同构往复循环一并封死；
+      c) 驻留不发贴边分：track 乘运动门控 max(前进/0.5·V_DES, |yaw_rate|/0.5)
+         —— 正常巡航与内角原地转向都拿满、停死拿 0，"转向离开角落"
+         成为内角处唯一的高收益动作。内角刹停转向的微小倒冲(|fwd|<0.03)
+         只扣一半以内，不误伤；
   - 找墙巡航（seek）防打转：激光全盲时（首次找墙、或捕获后丢墙超过包边
     宽限的"丢墙重找"——两者同治）给径直巡航更高的速度分、并惩罚偏航
     角速度（盲区专用的更高饱和上限，保证高速打转仍有梯度可下降）。
@@ -103,6 +120,11 @@ class WallFollowTask(object):
     U_TURN_PROB = 0.25       # 段间过渡为"墙端 U 型包边"（门洞侧柱课程）的概率
     GAP_BRIDGE_LAT = 0.35    # 判定"正在桥接该缺口"的最大横向偏离 (m)
     GAP_BRIDGE_HEAD = 0.6    # 判定桥接的最小航向·墙向余弦（须朝墙向直行）
+    CHASSIS_RADIUS = 0.175   # 底盘半径 (m)，与 gen_xml 一致；桥接虚拟贴边分用
+    # 倒车贴边分门控：fwd>=0 全额发放、<= -REV_TRACK_SCALE 全扣（线性过渡）。
+    # 见文件头"防往复极限环"注释；0.06m/s 取"内角刹停微倒冲(~0.03)只扣一半、
+    # 有意倒车(>=0.1) 必然全扣"之间。
+    REV_TRACK_SCALE = 0.06
     WALL_HALF_T = 0.08       # 训练墙半厚度（厚墙 + 硬接触，防止大力顶穿）
     LOST_TERM_TIME = 4.0     # 捕获过墙后，连续丢墙超时终止 (s)
     ACQUIRE_GRACE = 8.0      # 首次捕获前的找墙宽限 (s)
@@ -131,6 +153,7 @@ class WallFollowTask(object):
         self.course = []          # [(center_xy, len, height, yaw)] 供可视化
         self.gaps = []            # [(near_jamb_xy, dir_unit, width)] 墙体缺口（真值）
         self.bridging = False     # 当前是否正在直行桥接某个缺口
+        self.bridge_lat_err = 0.0 # 桥接时机身右缘到"墙线延长线"1cm 目标的偏差 (m)
 
         # 运行时状态
         self.prev_xy = np.zeros(2)
@@ -180,6 +203,11 @@ class WallFollowTask(object):
             if (float(fwd.dot(d)) > self.GAP_BRIDGE_HEAD
                     and -0.10 <= along <= g + 0.12
                     and -self.GAP_BRIDGE_LAT <= lateral <= 0.02):
+                # 虚拟贴边误差：缺口内激光无回波，用真值把原墙内侧面延长进
+                # 缺口充当"墙"。-lateral = 机身中心到墙线距离，目标 = 底盘
+                # 半径 + 1cm 贴边目标 —— calc_reward 按贴墙同一公式发 track，
+                # 让奖励跨缺口连续（否则缺口边缘是奖励悬崖，见文件头注释）。
+                self.bridge_lat_err = abs(-lateral - (self.CHASSIS_RADIUS + self.TARGET_DIST))
                 return True
         return False
 
@@ -245,20 +273,45 @@ class WallFollowTask(object):
         front = self.front_read
         front_clear = (front is None) or (not front.hit)
 
-        # 1) 贴边：右侧距离 -> 1cm（指数整形，8mm 尺度）
+        # 机体前向速度（贴边分的倒车门控与速度分都要用）
+        fwd_vel = float(self.world_vel_xy[0] * np.cos(yaw) +
+                        self.world_vel_xy[1] * np.sin(yaw))
+
+        # 1) 贴边：右侧距离 -> 1cm（指数整形，8mm 尺度）。
+        #    桥接缺口时激光无回波，用课程真值墙线的延长线充当"墙"、按同一
+        #    公式发【虚拟贴边分】—— track 跨缺口连续，"直行穿越"与"贴墙
+        #    直行"等值，消除缺口边缘的奖励悬崖（防往复极限环，见文件头）。
         if side.hit:
             err = abs(side.distance - self.TARGET_DIST)
-            track = np.exp(-err / 0.008)
+            track_raw = np.exp(-err / 0.008)
             lost = 0.0
-        else:
-            track = 0.0
+        elif self.bridging:
+            track_raw = np.exp(-self.bridge_lat_err / 0.008)
             lost = 1.0
+        else:
+            track_raw = 0.0
+            lost = 1.0
+        # 贴边分必须"在干活"才发（防两类白拿 track 的局部最优，见文件头）：
+        #   - 前进：0.5·V_DES 拿满 —— 正常巡航/贴墙直行不受影响；
+        #   - 原地转向：0.5rad/s 拿满 —— 内角刹停后的原地转向照发全额
+        #     （转向正是内角处的任务本身，不能罚）；
+        #   - 驻留（fwd≈0 且不转）→ 0：0713 版实测 9/9 个抵达内角的回合
+        #     全部停死在角落（5~16s），驻留每步白拿 track+upright≈0.33、
+        #     零支出（wobble 被 front.hit 门控关掉、approach 不动不罚），
+        #     策略毫无转向动机 —— 内角"直接暂停"的根因；
+        #   - 倒车（<=-REV_TRACK_SCALE）强制归零（转着倒也不行）——
+        #     缺口/墙端"倒车找回激光回波"往复极限环的收入来源。
+        # 注意 progress 门控与 wobble 门控仍用未扣发的 track_raw：倒车/驻留
+        # 时贴边质量本身没变差，速度罚不能因门控变小而被稀释。
+        move_gate = max(np.clip(fwd_vel / (0.5 * self.V_DES), 0.0, 1.0),
+                        np.clip(abs(self.yaw_rate) / 0.5, 0.0, 1.0))
+        rev_gate = np.clip((fwd_vel + self.REV_TRACK_SCALE) / self.REV_TRACK_SCALE,
+                           0.0, 1.0)
+        track = track_raw * float(move_gate * rev_gate)
 
         # 2) 沿墙推进：机体前向速度，用贴边质量门控。
         #    贴得准（track->1）才能拿满速度分；斜压在墙上滑行（track~0.3）
         #    只能拿 ~一半，再叠加蹭墙重罚后净收益为负，封死局部最优。
-        fwd_vel = float(self.world_vel_xy[0] * np.cos(yaw) +
-                        self.world_vel_xy[1] * np.sin(yaw))
         # 速度分改为在 V_DES 处封顶的"帐篷"形：fwd=V_DES 拿满分、超速线性扣回、
         # 2×V_DES 归零、更快为负。旧 clip 形在 V_DES 饱和、超速零代价，实测
         # 策略巡航到 2× 旧V_DES 也不吃任何罚 —— 速度彻底失控，且让"高速螺旋
@@ -268,12 +321,14 @@ class WallFollowTask(object):
                            -1.0, 1.0)
         seek_blind = False    # 盲区巡航找墙状态（首次找墙 / 丢墙重找），联动 wobble
         if side.hit:
-            progress *= (0.25 + 0.75 * track)
+            progress *= (0.25 + 0.75 * track_raw)
         elif self.bridging:
             # 墙体缺口（门洞/断墙）：前方有共线墙可续贴 —— 鼓励【全速直行桥接】、
             # 几乎不罚丢墙，让机器人匀速穿过缺口到对侧重新贴墙，而不是中途减速、
             # 原地转向、重新找墙。与外角包边用真值区分（外角前方没有共线墙）。
-            progress *= 1.0
+            # progress 门控与贴墙同式（用虚拟 track_raw）：跨缺口的 track 与
+            # progress 都连续，且拐进缺口内侧（偏离墙线）拿不满速度分。
+            progress *= (0.25 + 0.75 * track_raw)
             lost *= 0.15
         elif not self.acquired:
             # 找墙巡航（seek）：本回合还从未捕获过墙、激光全盲。给径直巡航
@@ -330,7 +385,7 @@ class WallFollowTask(object):
         if not front_clear:
             steady, yaw_scale, wob_cap = 0.0, self.YAW_RATE_SCALE, 1.0
         elif side.hit:
-            steady, yaw_scale, wob_cap = track, self.TRACK_YAW_SCALE, self.TRACK_WOB_CAP
+            steady, yaw_scale, wob_cap = track_raw, self.TRACK_YAW_SCALE, self.TRACK_WOB_CAP
         elif self.bridging:
             steady, yaw_scale, wob_cap = 1.0, self.YAW_RATE_SCALE, 1.0
         elif seek_blind:
@@ -403,6 +458,7 @@ class WallFollowTask(object):
         self.side_read = None
         self.gaps = []
         self.bridging = False
+        self.bridge_lat_err = 0.0
 
         # 传感器噪声课程：0 -> 2mm
         self.sensor_noise = 0.002 * frac

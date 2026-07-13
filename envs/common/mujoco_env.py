@@ -5,6 +5,63 @@ import mujoco_viewer
 
 DEFAULT_SIZE = 500
 
+
+def _add_marker_to_scene_compat(self, marker):
+    """mujoco_viewer 0.1.4 的 _add_marker_to_scene 兼容版。
+
+    mujoco 3.2.0 起 MjvGeom 移除了 texid/texuniform/texrepeat/emission/
+    specular/shininess/reflectance 字段（改为 matid），原版会直接
+    AttributeError。这里对所有默认字段加 hasattr 守卫，
+    新旧 mujoco（2.3.6 / 3.4+）均可用。
+    """
+    if self.scn.ngeom >= self.scn.maxgeom:
+        raise RuntimeError('Ran out of geoms. maxgeom: %d' % self.scn.maxgeom)
+
+    g = self.scn.geoms[self.scn.ngeom]
+    defaults = {
+        'dataid': -1,
+        'objtype': mujoco.mjtObj.mjOBJ_UNKNOWN,
+        'objid': -1,
+        'category': mujoco.mjtCatBit.mjCAT_DECOR,
+        'texid': -1,
+        'texuniform': 0,
+        'emission': 0,
+        'specular': 0.5,
+        'shininess': 0.5,
+        'reflectance': 0,
+        'matid': -1,
+        'type': mujoco.mjtGeom.mjGEOM_BOX,
+    }
+    for key, value in defaults.items():
+        if hasattr(g, key):
+            setattr(g, key, value)
+    if hasattr(g, 'texrepeat'):
+        g.texrepeat[:] = 1
+    g.size[:] = np.ones(3) * 0.1
+    g.mat[:] = np.eye(3)
+    g.rgba[:] = np.ones(4)
+
+    for key, value in marker.items():
+        if isinstance(value, (int, float, mujoco._enums.mjtGeom)):
+            setattr(g, key, value)
+        elif isinstance(value, (tuple, list, np.ndarray)):
+            attr = getattr(g, key)
+            attr[:] = np.asarray(value).reshape(attr.shape)
+        elif isinstance(value, str):
+            assert key == "label", "Only label is a string in mjtGeom."
+            g.label = value
+        elif hasattr(g, key):
+            raise ValueError(
+                "mjtGeom has attr {} but type {} is invalid".format(
+                    key, type(value)))
+        else:
+            raise ValueError("mjtGeom doesn't have field %s" % key)
+
+    self.scn.ngeom += 1
+
+
+mujoco_viewer.MujocoViewer._add_marker_to_scene = _add_marker_to_scene_compat
+
 class MujocoEnv():
     """Superclass for all MuJoCo environments.
     """

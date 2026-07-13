@@ -87,7 +87,10 @@ def main():
     else:
         path_to_actor = os.path.join(args.path, "actor.pt")
 
-    policy = torch.load(path_to_actor)
+    # 服务器(torch 2.5+numpy 2.x)保存的整模型 pickle：
+    # weights_only=False 允许反序列化自定义 Actor 类（torch>=2.6 默认 True）；
+    # map_location 兼容 GPU 上保存、本地 CPU 加载
+    policy = torch.load(path_to_actor, map_location="cpu", weights_only=False)
     policy.eval()
 
     env = VacuumWFEnv(home_scene=args.home)

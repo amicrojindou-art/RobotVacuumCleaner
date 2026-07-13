@@ -92,7 +92,7 @@ nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum
 tail -f train_vacuum_wf0713.log
 
 python scripts/debug_wallfollow.py --path experiments/vacuum_wf0709          # 随机墙
-python scripts/debug_wallfollow.py --path experiments/vacuum_wf0709 --home   # 家居泛化
+python scripts/debug_wallfollow.py --path experiments/vacuum_wf0713 --home   # 家居泛化
 
 
 export TMPDIR=/mnt/sdb-36T/zjdou/tmp   # 换成你的大磁盘路径，目录需已存在
