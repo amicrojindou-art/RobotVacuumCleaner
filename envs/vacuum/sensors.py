@@ -11,7 +11,7 @@ XML 侧（见 gen_xml._laser_sites/_laser_sensors）把一个"线激光"建成�
   hit        : 是否有任一射线命中（False 即"量程内无障碍"）
 
 用法：
-    laser = LineLaser(model, data, 'front')   # 或 'left'
+    laser = LineLaser(model, data, 'front')   # 或 'right'（右侧侧边激光，与真机一致）
     reading = laser.read()
 """
 
@@ -28,7 +28,7 @@ LaserReading = namedtuple('LaserReading', ['distance', 'confidence', 'hit', 'ray
 class LineLaser(object):
 
     def __init__(self, model, data, prefix, max_range=LASER_MAX_RANGE, noise_std=0.0):
-        """prefix: 'front' 或 'left'；noise_std: 可选的测距高斯噪声 (m)。"""
+        """prefix: 'front' 或 'right'；noise_std: 可选的测距高斯噪声 (m)。"""
         self.model = model
         self.data = data
         self.prefix = prefix

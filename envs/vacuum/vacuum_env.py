@@ -38,10 +38,10 @@ class VacuumEnv(mujoco_env.MujocoEnv):
             self.model, self.data,
             rfoot_body_name='right_wheel', lfoot_body_name='left_wheel')
 
-        # 线激光传感器（沿边沿墙用）：正前方 + 左侧各一个。
+        # 线激光传感器（沿边沿墙用）：正前方 + 右侧各一个（与真机一致装在右侧）。
         # 仅作为传感器接口暴露，不进入 RL 观测（观测维度保持 23，兼容已训练模型）。
         self.laser_front = LineLaser(self.model, self.data, 'front')
-        self.laser_left = LineLaser(self.model, self.data, 'left')
+        self.laser_right = LineLaser(self.model, self.data, 'right')
 
         # 任务
         self.task = vacuum_task.VacuumTask(

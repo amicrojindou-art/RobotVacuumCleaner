@@ -90,15 +90,15 @@ def main():
         ok &= check("{}: hit={} conf={:.2f} dist={:.3f}".format(
             desc, r.hit, r.confidence, r.distance), pred(r))
 
-    # ---------- 左侧激光 ----------
-    print("== 左侧激光（左侧 2cm 处 20cm 高墙）==")
+    # ---------- 右侧激光（与真机一致装在右侧）----------
+    print("== 右侧激光（右侧 2cm 处 20cm 高墙）==")
     env.task._bury_all_boxes()
     mujoco.mj_forward(env.model, env.data)
     gap = 0.02
-    edge_y = 0.0 + CHASSIS_RADIUS
-    place_box(env, 'box02', 1.0, edge_y + gap + half_t, 0.20)
-    r = env.laser_left.read()
-    ok &= check("左侧测距 {:.4f}m ≈ {:.2f}m, conf={:.2f}".format(r.distance, gap, r.confidence),
+    edge_y = 0.0 - CHASSIS_RADIUS
+    place_box(env, 'box02', 1.0, edge_y - gap - half_t, 0.20)
+    r = env.laser_right.read()
+    ok &= check("右侧测距 {:.4f}m ≈ {:.2f}m, conf={:.2f}".format(r.distance, gap, r.confidence),
                 r.hit and abs(r.distance - gap) < 0.005 and r.confidence == 1.0)
 
     print("\n全部通过" if ok else "\n存在失败项")

@@ -1,0 +1,724 @@
+Generating vacuum-cleaner XML model...
+Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_19956.xml
+Generating vacuum-cleaner XML model...
+Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_19956.xml
+Doing norm column initialization.
+Gathering input normalization data using 100000 steps, noise = 1...
+[2m[36m(_run_random_actions pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(_run_random_actions pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(_run_random_actions pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(_run_random_actions pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(_run_random_actions pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(_run_random_actions pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(_run_random_actions pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Done gathering input normalization data.
+Generating vacuum-cleaner XML model...
+Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_19956.xml
+Generating vacuum-cleaner XML model...
+Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_19956.xml
+********** Iteration 0 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 3.67s for 3600 steps.
+Optimizer took: 1.24s
+-------------------------------------
+|  Return (batch) |          22.831 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |        -0.00496 |
+|     Critic loss |          0.0307 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00477 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0472 |
+-------------------------------------
+Total time elapsed: 4.95s. Total steps: 3600 (fps=727.41)
+********** Iteration 1 ************
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+Sampling took 1.94s for 3600 steps.
+Optimizer took: 1.48s
+-------------------------------------
+|  Return (batch) |          21.313 |
+|      Mean Eplen |             400 |
+|      Actor loss |        -0.00889 |
+|     Critic loss |           0.258 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00894 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.127 |
+-------------------------------------
+Total time elapsed: 8.37s. Total steps: 7200 (fps=860.73)
+********** Iteration 2 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+Sampling took 1.66s for 3600 steps.
+Optimizer took: 1.28s
+-------------------------------------
+|  Return (batch) |          26.869 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |          -0.011 |
+|     Critic loss |           0.278 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00877 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.117 |
+-------------------------------------
+Total time elapsed: 11.31s. Total steps: 10800 (fps=955.22)
+********** Iteration 3 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.91s for 3600 steps.
+Optimizer took: 1.27s
+-------------------------------------
+|  Return (batch) |          19.657 |
+|      Mean Eplen |          327.27 |
+|      Actor loss |        -0.00502 |
+|     Critic loss |           0.196 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00812 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.116 |
+-------------------------------------
+Total time elapsed: 14.48s. Total steps: 14400 (fps=994.35)
+********** Iteration 4 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+Sampling took 1.80s for 3600 steps.
+Optimizer took: 1.25s
+-------------------------------------
+|  Return (batch) |           10.68 |
+|      Mean Eplen |          257.14 |
+|      Actor loss |         -0.0201 |
+|     Critic loss |          0.0769 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0112 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.178 |
+-------------------------------------
+Total time elapsed: 17.54s. Total steps: 18000 (fps=1026.25)
+********** Iteration 5 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 2.04s for 3600 steps.
+Optimizer took: 1.26s
+-------------------------------------
+|  Return (batch) |          30.585 |
+|      Mean Eplen |             450 |
+|      Actor loss |         -0.0107 |
+|     Critic loss |           0.411 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0092 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.104 |
+-------------------------------------
+Total time elapsed: 20.84s. Total steps: 21600 (fps=1036.59)
+********** Iteration 6 ************
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.76s for 3600 steps.
+Optimizer took: 1.29s
+-------------------------------------
+|  Return (batch) |          31.326 |
+|      Mean Eplen |             450 |
+|      Actor loss |         -0.0163 |
+|     Critic loss |           0.364 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0103 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.153 |
+-------------------------------------
+Total time elapsed: 23.89s. Total steps: 25200 (fps=1054.78)
+********** Iteration 7 ************
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.93s for 3600 steps.
+Optimizer took: 1.26s
+-------------------------------------
+|  Return (batch) |           32.56 |
+|      Mean Eplen |             450 |
+|      Actor loss |        -0.00737 |
+|     Critic loss |           0.186 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00777 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |            0.11 |
+-------------------------------------
+Total time elapsed: 27.09s. Total steps: 28800 (fps=1063.30)
+********** Iteration 8 ************
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.94s for 3600 steps.
+Optimizer took: 1.47s
+-------------------------------------
+|  Return (batch) |           52.44 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |        -0.00728 |
+|     Critic loss |           0.401 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00885 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |            0.12 |
+-------------------------------------
+Total time elapsed: 30.50s. Total steps: 32400 (fps=1062.41)
+********** Iteration 9 ************
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+Sampling took 1.67s for 3600 steps.
+Optimizer took: 1.25s
+-------------------------------------
+|  Return (batch) |          48.539 |
+|      Mean Eplen |             450 |
+|      Actor loss |        -0.00609 |
+|     Critic loss |           0.537 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00757 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0971 |
+-------------------------------------
+Total time elapsed: 33.41s. Total steps: 36000 (fps=1077.48)
+********** Iteration 10 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.57s for 3600 steps.
+Optimizer took: 1.35s
+-------------------------------------
+|  Return (batch) |          70.572 |
+|      Mean Eplen |             600 |
+|      Actor loss |        -0.00682 |
+|     Critic loss |           0.605 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0109 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.146 |
+-------------------------------------
+Total time elapsed: 36.34s. Total steps: 39600 (fps=1089.85)
+********** Iteration 11 ************
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.68s for 3600 steps.
+Optimizer took: 1.22s
+-------------------------------------
+|  Return (batch) |          34.057 |
+|      Mean Eplen |             360 |
+|      Actor loss |        -0.00537 |
+|     Critic loss |           0.591 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00972 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.129 |
+-------------------------------------
+Total time elapsed: 39.24s. Total steps: 43200 (fps=1100.81)
+********** Iteration 12 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.65s for 3600 steps.
+Optimizer took: 1.41s
+-------------------------------------
+|  Return (batch) |          54.271 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |        -0.00536 |
+|     Critic loss |           0.698 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00747 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0979 |
+-------------------------------------
+Total time elapsed: 42.30s. Total steps: 46800 (fps=1106.27)
+********** Iteration 13 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+Sampling took 1.73s for 3600 steps.
+Optimizer took: 1.43s
+-------------------------------------
+|  Return (batch) |          53.182 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |         -0.0163 |
+|     Critic loss |            1.08 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0119 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.169 |
+-------------------------------------
+Total time elapsed: 45.47s. Total steps: 50400 (fps=1108.49)
+********** Iteration 14 ************
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.98s for 3600 steps.
+Optimizer took: 1.38s
+-------------------------------------
+|  Return (batch) |          87.073 |
+|      Mean Eplen |             600 |
+|      Actor loss |         -0.0065 |
+|     Critic loss |           0.583 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00792 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.108 |
+-------------------------------------
+Total time elapsed: 48.83s. Total steps: 54000 (fps=1105.92)
+********** Iteration 15 ************
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 3.02s for 3600 steps.
+Optimizer took: 1.85s
+-------------------------------------
+|  Return (batch) |          85.411 |
+|      Mean Eplen |             600 |
+|      Actor loss |        -0.00644 |
+|     Critic loss |           0.688 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0071 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0907 |
+-------------------------------------
+Total time elapsed: 53.70s. Total steps: 57600 (fps=1072.69)
+********** Iteration 16 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 2.26s for 3600 steps.
+Optimizer took: 1.22s
+-------------------------------------
+|  Return (batch) |          91.235 |
+|      Mean Eplen |             600 |
+|      Actor loss |         -0.0117 |
+|     Critic loss |           0.825 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00593 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0661 |
+-------------------------------------
+Total time elapsed: 57.18s. Total steps: 61200 (fps=1070.36)
+********** Iteration 17 ************
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+Sampling took 2.05s for 3600 steps.
+Optimizer took: 1.28s
+-------------------------------------
+|  Return (batch) |          89.191 |
+|      Mean Eplen |             600 |
+|      Actor loss |        -0.00732 |
+|     Critic loss |           0.688 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00759 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0982 |
+-------------------------------------
+Total time elapsed: 60.51s. Total steps: 64800 (fps=1070.93)
+********** Iteration 18 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.70s for 3600 steps.
+Optimizer took: 1.37s
+-------------------------------------
+|  Return (batch) |          74.335 |
+|      Mean Eplen |          514.29 |
+|      Actor loss |        -0.00769 |
+|     Critic loss |            1.43 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0096 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.128 |
+-------------------------------------
+Total time elapsed: 63.59s. Total steps: 68400 (fps=1075.72)
+********** Iteration 19 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+Sampling took 1.92s for 3600 steps.
+Optimizer took: 1.27s
+-------------------------------------
+|  Return (batch) |          61.961 |
+|      Mean Eplen |             450 |
+|      Actor loss |        -0.00782 |
+|     Critic loss |            1.42 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00904 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.114 |
+-------------------------------------
+Total time elapsed: 66.78s. Total steps: 72000 (fps=1078.21)
+********** Iteration 20 ************
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.75s for 3600 steps.
+Optimizer took: 1.44s
+-------------------------------------
+|  Return (batch) |          54.023 |
+|      Mean Eplen |             360 |
+|      Actor loss |         -0.0105 |
+|     Critic loss |            1.67 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0108 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.147 |
+-------------------------------------
+Total time elapsed: 69.97s. Total steps: 75600 (fps=1080.47)
+********** Iteration 21 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+Sampling took 1.84s for 3600 steps.
+Optimizer took: 1.37s
+-------------------------------------
+|  Return (batch) |          50.776 |
+|      Mean Eplen |             360 |
+|      Actor loss |        -0.00711 |
+|     Critic loss |            1.82 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00773 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |          0.0946 |
+-------------------------------------
+Total time elapsed: 73.19s. Total steps: 79200 (fps=1082.15)
+********** Iteration 22 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.95s for 3600 steps.
+Optimizer took: 1.38s
+-------------------------------------
+|  Return (batch) |          54.396 |
+|      Mean Eplen |             360 |
+|      Actor loss |        -0.00936 |
+|     Critic loss |            1.88 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0099 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.135 |
+-------------------------------------
+Total time elapsed: 76.53s. Total steps: 82800 (fps=1081.95)
+********** Iteration 23 ************
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.76s for 3600 steps.
+Optimizer took: 1.23s
+-------------------------------------
+|  Return (batch) |          51.242 |
+|      Mean Eplen |          327.27 |
+|      Actor loss |         -0.0115 |
+|     Critic loss |            1.99 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0124 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.154 |
+-------------------------------------
+Total time elapsed: 79.52s. Total steps: 86400 (fps=1086.58)
+********** Iteration 24 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 2.18s for 3600 steps.
+Optimizer took: 1.24s
+-------------------------------------
+|  Return (batch) |          50.987 |
+|      Mean Eplen |             360 |
+|      Actor loss |        -0.00379 |
+|     Critic loss |            2.84 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00945 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.122 |
+-------------------------------------
+Total time elapsed: 82.94s. Total steps: 90000 (fps=1085.17)
+********** Iteration 25 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+Sampling took 1.77s for 3600 steps.
+Optimizer took: 1.31s
+-------------------------------------
+|  Return (batch) |          49.854 |
+|      Mean Eplen |             360 |
+|      Actor loss |         -0.0106 |
+|     Critic loss |            2.84 |
+|     Mirror loss |               0 |
+|     Mean KL Div |         0.00892 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.119 |
+-------------------------------------
+Total time elapsed: 86.01s. Total steps: 93600 (fps=1088.24)
+********** Iteration 26 ************
+[2m[36m(sample pid=13592)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=13592)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_13592.xml
+[2m[36m(sample pid=41372)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41372)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41372.xml
+[2m[36m(sample pid=27376)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=27376)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_27376.xml
+[2m[36m(sample pid=41296)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=41296)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_41296.xml
+[2m[36m(sample pid=40440)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=40440)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_40440.xml
+[2m[36m(sample pid=38984)[0m Generating vacuum-cleaner XML model...
+[2m[36m(sample pid=38984)[0m Exported XML model to  C:\Users\zhang\AppData\Local\Temp\mjcf-export\vacuum_wf\vacuum_wf_rand_38984.xml
+Sampling took 1.97s for 3600 steps.
+Optimizer took: 1.35s
+-------------------------------------
+|  Return (batch) |          48.785 |
+|      Mean Eplen |          327.27 |
+|      Actor loss |         -0.0107 |
+|     Critic loss |            2.76 |
+|     Mirror loss |               0 |
+|     Mean KL Div |          0.0093 |
+|    Mean Entropy |          0.0811 |
+|   Clip Fraction |           0.121 |
+-------------------------------------

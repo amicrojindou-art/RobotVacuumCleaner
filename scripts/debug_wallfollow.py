@@ -6,6 +6,9 @@
 
   # 家居场景（验证泛化：策略只见过随机折线墙，从未见过该户型）
   $env:PYTHONPATH="."; python scripts/debug_wallfollow.py --path experiments/vacuum_wf --home
+
+  # 延长每回合仿真时长（如 120 秒，默认 30 秒）
+  $env:PYTHONPATH="."; python scripts/debug_wallfollow.py --path experiments/vacuum_wf --home --time 120
 """
 
 import os
@@ -22,7 +25,9 @@ from envs.vacuum.vacuum_wf_env import VacuumWFEnv
 from scripts.wall_follow_demo import draw_lasers
 
 
-def run(env, policy, episodes):
+def run(env, policy, episodes, sim_time):
+    # 每回合最大控制步数 = 仿真时长 / 控制周期（40Hz -> 每秒 40 步）
+    end_ts = int(round(sim_time / env.robot.control_dt))
     for ep in range(episodes):
         observation = env.reset()
         env.render()
@@ -30,7 +35,7 @@ def run(env, policy, episodes):
         viewer._paused = True
 
         done = False
-        ts, end_ts = 0, 1200
+        ts = 0
         ep_rewards = []
         track_errs = []
 
@@ -42,9 +47,9 @@ def run(env, policy, episodes):
             observation, _, done, info = env.step(action.copy())
             ep_rewards.append(info)
 
-            left = env.laser_left.read()
-            if left.hit:
-                track_errs.append(abs(left.distance - env.task.TARGET_DIST))
+            side = env.laser_right.read()
+            if side.hit:
+                track_errs.append(abs(side.distance - env.task.TARGET_DIST))
 
             draw_lasers(env, viewer)
             env.render()
@@ -73,6 +78,8 @@ def main():
     parser.add_argument("--home", action="store_true",
                         help="在家居场景中回放（验证泛化）")
     parser.add_argument("--episodes", default=5, type=int)
+    parser.add_argument("--time", default=120.0, type=float,
+                        help="每回合仿真时长(秒)，默认 30s；策略失败(翻车/丢墙等)仍会提前结束")
     args = parser.parse_args()
 
     if os.path.isfile(args.path) and args.path.endswith(".pt"):
@@ -103,7 +110,7 @@ def main():
         print("=" * 60)
         sys.exit(1)
 
-    run(env, policy, args.episodes)
+    run(env, policy, args.episodes, args.time)
     env.close()
 
 

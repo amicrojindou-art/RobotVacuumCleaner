@@ -10,11 +10,13 @@
 观测（34 维）：
   机体 14：root 四元数(yaw 置零) 4 + 机体角速度 3 + 机体线速度 3 +
            轮速 2 + 上一步动作 2
-  传感  8：前向距离/0.1、前向置信度、左侧距离/0.1、左侧置信度、
-           左侧距离变化率(滤波)、机身接触、左轮接地、右轮接地
-  历史 12：激光 4 元组（前距/前置信/左距/左置信）在 0.05s/0.1s/0.2s
+  传感  8：前向距离/0.1、前向置信度、右侧距离/0.1、右侧置信度、
+           右侧距离变化率(滤波)、机身接触、左轮接地、右轮接地
+  历史 12：激光 4 元组（前距/前置信/右距/右置信）在 0.05s/0.1s/0.2s
            前的快照。拐角处是部分可观测问题（激光会短暂丢失目标），
            前馈网络需要短时历史来分辨"刚丢墙"和"一直没墙"。
+
+侧边激光与真机一致装在【右侧】（沿墙时墙在机器人右侧、绕房间逆时针巡边）。
 """
 
 import os
@@ -51,9 +53,9 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
             self.model, self.data,
             rfoot_body_name='right_wheel', lfoot_body_name='left_wheel')
 
-        # 线激光
+        # 线激光（侧边激光与真机一致装在右侧）
         self.laser_front = LineLaser(self.model, self.data, 'front')
-        self.laser_left = LineLaser(self.model, self.data, 'left')
+        self.laser_right = LineLaser(self.model, self.data, 'right')
 
         # 训练墙/门槛（mocap 地形）接触加硬：默认软接触在轮子大力矩顶墙时
         # 会深度穿透，策略会学到"顶进墙里"这类不物理的行为
@@ -73,7 +75,7 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         )
         self.task.home_scene = home_scene
         self.task.laser_front = self.laser_front
-        self.task.laser_left = self.laser_left
+        self.task.laser_right = self.laser_right
 
         self.robot = vacuum_robot.VacuumRobot(
             pdgains=None, dt=control_dt, active=self.actuators,
@@ -89,9 +91,9 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self.base_obs_len = self.robot_state_len + self.ext_state_len
         self.observation_space = np.zeros(self.base_obs_len)
 
-        # 左侧距离变化率（低通滤波），给 policy 提供阻尼信息
-        self._prev_left_d = None
-        self._dleft_f = 0.0
+        # 右侧距离变化率（低通滤波），给 policy 提供阻尼信息
+        self._prev_side_d = None
+        self._dside_f = 0.0
         self._laser_hist = []
 
         self.reset_model()
@@ -124,22 +126,22 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         ])
 
         front = self.laser_front.read()
-        left = self.laser_left.read()
+        side = self.laser_right.read()
 
-        # 左侧距离变化率（限幅 + 低通）
-        if self._prev_left_d is None:
-            dleft = 0.0
+        # 右侧距离变化率（限幅 + 低通）
+        if self._prev_side_d is None:
+            dside = 0.0
         else:
-            dleft = np.clip((left.distance - self._prev_left_d) / self.robot.control_dt,
+            dside = np.clip((side.distance - self._prev_side_d) / self.robot.control_dt,
                             -0.3, 0.3)
-        self._prev_left_d = left.distance
-        self._dleft_f += 0.35 * (dleft - self._dleft_f)
+        self._prev_side_d = side.distance
+        self._dside_f += 0.35 * (dside - self._dside_f)
 
         laser_now = np.array([
             front.distance / LASER_MAX_RANGE,
             front.confidence,
-            left.distance / LASER_MAX_RANGE,
-            left.confidence,
+            side.distance / LASER_MAX_RANGE,
+            side.confidence,
         ])
 
         # 激光历史帧（不足时用最早一帧补齐）
@@ -154,7 +156,7 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         ext_state = np.concatenate([
             laser_now,
             np.array([
-                self._dleft_f / 0.3,
+                self._dside_f / 0.3,
                 self.task.contact_belly,
                 self.task.contact_lwheel,
                 self.task.contact_rwheel,
@@ -184,7 +186,7 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
 
         # 激光噪声由任务课程决定
         self.laser_front.noise_std = self.task.sensor_noise
-        self.laser_left.noise_std = self.task.sensor_noise
+        self.laser_right.noise_std = self.task.sensor_noise
 
         c = 0.01
         init_qpos = np.array(self.robot.init_qpos_, dtype=np.float64)
@@ -203,8 +205,8 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self.robot.prev_torque = None
         self.robot.last_action = None
         self.robot.last_torque = None
-        self._prev_left_d = None
-        self._dleft_f = 0.0
+        self._prev_side_d = None
+        self._dside_f = 0.0
         self._laser_hist = []
 
         self.set_state(init_qpos, init_qvel)
