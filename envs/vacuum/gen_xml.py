@@ -273,11 +273,16 @@ def _scene_geoms():
     # 白色净化器立柱（外间西南角）
     g.append('    <geom name="purifier" type="box" size="0.10 0.10 0.28" pos="-1.0 -1.45 0.28" '
              'material="wall_white"/>')
-    # 回充基座（西墙）+ 前伸底板（8mm，可驶上）
+    # 回充基座（西墙）+ 前伸底板。底板改为【纯视觉】（2026-07-13）：真机底板
+    # 是带斜坡沿的 2~3mm 薄塑料板，机器人直接碾过；此前建成 8mm 直角硬台阶
+    # 反而失真 —— 它低于线激光最低射线(3.5cm)属检测盲区，观测"前方畅通"
+    # 但物理被板沿顶住（且板宽 26cm < 轮距 30cm，骑上去万向球架空、驱动轮
+    # 失去抓地），沿墙策略在此处失速、前后往复。沿边任务只需绕开基站座体
+    # （22cm 高，激光可见），底板不应构成物理障碍。
     g.append('    <geom name="dock" type="box" size="0.065 0.13 0.11" pos="-1.11 0.7 0.11" '
              'material="wall_white"/>')
-    g.append('    <geom name="dock_plate" type="box" size="0.105 0.13 0.004" pos="-0.94 0.7 0.004" '
-             'material="dark" friction="0.8 0.05 0.05"/>')
+    g.append('    <geom class="visual" name="dock_plate" type="box" size="0.105 0.13 0.004" '
+             'pos="-0.94 0.7 0.004" material="dark"/>')
     # 彩色泡沫积木（里间东墙，两块落地 + 一块叠放）
     g.append('    <geom name="blk_r" type="box" size="0.065 0.065 0.065" pos="3.05 0.95 0.065" '
              'material="foam_red"/>')
