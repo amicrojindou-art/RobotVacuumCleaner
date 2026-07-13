@@ -21,7 +21,7 @@ class JvrcArmEnv(mujoco_env.MujocoEnv):
         frame_skip = (control_dt / sim_dt)  # 帧跳过：每10个仿真步执行一次控制
 
         # MuJoCo模型文件路径
-        path_to_xml_out = '/tmp/mjcf-export/jvrc_arm/jvrc1.xml'
+        path_to_xml_out = '/mnt/sdb-36T/zjdou/mjcf-export/jvrc_arm/jvrc1.xml'
         if not os.path.exists(path_to_xml_out):
             builder(path_to_xml_out)  # 如果XML文件不存在，则生成
         # 初始化MuJoCo环境

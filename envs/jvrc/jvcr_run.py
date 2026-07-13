@@ -29,7 +29,7 @@ class JvrcRunEnv(mujoco_env.MujocoEnv):
         frame_skip = (control_dt / sim_dt)  # 每控制步跳过的仿真步数
 
         # 生成MuJoCo模型文件路径
-        path_to_xml_out = '/tmp/mjcf-export/jvrc_walk/jvrc1.xml'
+        path_to_xml_out = '/mnt/sdb-36T/zjdou/mjcf-export/jvrc_walk/jvrc1.xml'
         if not os.path.exists(path_to_xml_out):
             builder(path_to_xml_out)  # 如果XML文件不存在，则生成
 
