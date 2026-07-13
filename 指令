@@ -81,3 +81,21 @@ tail -f train_vacuum_wf07091.log
 
 python scripts/debug_wallfollow.py --path experiments/vacuum_wf07091          # 随机墙
 python scripts/debug_wallfollow.py --path experiments/vacuum_wf07091 --home   # 家居泛化
+
+
+================================= 2026年0713训练===========================================
+python run_experiment.py train --env vacuum_wf --n_itr 2000 --num_procs 12 --target_kl 0.04 --lr_decay --logdir experiments/vacuum_wf0709
+
+nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0713 --n_itr 2000 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0713.log 2>&1 &
+
+查看运行日志
+tail -f train_vacuum_wf0713.log
+
+python scripts/debug_wallfollow.py --path experiments/vacuum_wf0709          # 随机墙
+python scripts/debug_wallfollow.py --path experiments/vacuum_wf0709 --home   # 家居泛化
+
+
+export TMPDIR=/mnt/sdb-36T/zjdou/tmp   # 换成你的大磁盘路径，目录需已存在
+
+echo 'export TMPDIR=/mnt/sdb-36T/zjdou/tmp' >> ~/.bashrc
+source ~/.bashrc
