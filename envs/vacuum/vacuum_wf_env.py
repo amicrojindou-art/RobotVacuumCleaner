@@ -10,10 +10,11 @@
 观测（34 维）：
   机体 14：root 四元数(yaw 置零) 4 + 机体角速度 3 + 机体线速度 3 +
            轮速 2 + 上一步动作 2
-  传感  8：前向距离/0.1、前向置信度、右侧距离/0.1、右侧置信度、
-           右侧距离变化率(滤波)、机身接触方位(+1左/-1右/0无，对应真机
-           保险杠左右分区——浅凸起在双激光盲区，只能靠碰撞感知方向)、
-           左轮接地、右轮接地
+  传感  8：前向距离/0.1、前向置信度（机身前半碰撞时二者注入"1cm/置信 1"
+           的虚拟回波——保险杠 = 0 距离前障，盲区障碍撞上即等同"前方
+           1cm 有墙"，复用 head_on/内角反射）、右侧距离/0.1、右侧置信度、
+           右侧距离变化率(滤波)、机身接触方位(+1左/-1右/0无，真机保险杠
+           左右分区)、左轮接地、右轮接地
   历史 12：激光 4 元组（前距/前置信/右距/右置信）在 0.05s/0.1s/0.2s
            前的快照。拐角处是部分可观测问题（激光会短暂丢失目标），
            前馈网络需要短时历史来分辨"刚丢墙"和"一直没墙"。
@@ -129,6 +130,13 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
 
         front = self.laser_front.read()
         side = self.laser_right.read()
+        front_d, front_c = front.distance, front.confidence
+        # 机身前半碰撞 -> 前向通道注入 1cm 虚拟回波（保险杠 = 0 距离前障，
+        # 与任务层 task.front_read 的融合一致；历史帧同步记录融合值）：
+        # 盲区障碍（凸出<18.5cm）撞上瞬间，策略看到的就是"前方 1cm 有墙"，
+        # 直接复用 head_on/内角的既有反射。
+        if self.task.contact_belly > 0.5 and self.task.contact_front > 0.5:
+            front_d, front_c = self.task.BUMP_ECHO_DIST, 1.0
 
         # 右侧距离变化率（限幅 + 低通）
         if self._prev_side_d is None:
@@ -140,8 +148,8 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self._dside_f += 0.35 * (dside - self._dside_f)
 
         laser_now = np.array([
-            front.distance / LASER_MAX_RANGE,
-            front.confidence,
+            front_d / LASER_MAX_RANGE,
+            front_c,
             side.distance / LASER_MAX_RANGE,
             side.confidence,
         ])
