@@ -72,16 +72,25 @@
     不会包边、原地打转甩出。
   - 浅凸起（壁柱/薄墙端面/基站座体）：贴边巡航时前向激光射线距墙 18.5cm，
     凸出量小于它的障碍接触前【双激光零预警】（几何盲区，训练墙厚 16cm 的
-    U 型端面也在内），只能靠碰撞感知。处置 = 把碰撞翻译成前向激光的
-    【1cm 虚拟回波】（机身前半接触时注入，真机保险杠 = 0 距离前障）：
-    策略眼里"前方 1cm 突然出现墙"，直接复用 head_on/内角的成熟反射
+    U 型端面也在内），只能靠碰撞感知。处置 = 保险杠碰撞 -> 在正前 1cm 处
+    记一面【虚拟墙】（世界系平面，真机 = 碰撞事件写入局部地图），之后每步
+    按真实射线几何算前向读数：碰撞瞬间读 1cm，原地左转中读数按
+    0.185/cosθ−0.175 增长、转过 ~48° 自然消失 —— 与真实内角的前向激光
+    观测分布【完全一致】，策略直接复用 head_on/内角的成熟反射
     （刹停 -> 原地左转 -> 侧激光贴上新面 -> 沿边）；approach 由此在碰撞时
     生效（顶墙前推吃重罚），wobble 的 front 门控自动放开碰撞后的转向。
     观测中的机身接触带方位（+1左/-1右）。课程随机贴凸块（凸出量随课程
     2->12cm 渐进）练这条反射。
-    ——历史教训（0714）：曾用"碰撞期+0.6s 豁免 wobble"方案，把接触
-    常态化，重训后碰撞卫生崩坏（家居回放 5/5 死于顶墙推压、凸块处 47 次
-    往复），已回退；虚拟回波方案不豁免任何惩罚，只补感知。
+    ——历史教训（两次重训失败）：
+    ① 0714 版"碰撞期+0.6s 豁免 wobble"把接触常态化，碰撞卫生崩坏
+      （家居回放 5/5 死于顶墙推压、凸块处 47 次往复），已回退；
+    ② 0714_1 版虚拟回波用"机身前半（±90°）接触"当触发条件 —— 贴边 1cm
+      巡航的常态侧蹭（方位角≈-90°）与阳角包边中蹭到墙角都被翻译成
+      "正前 1cm 有墙"：approach 全额砸在正常巡航上（策略学到"贴墙危险"、
+      普通场景不再沿边），阳角处则触发 head_on 反射原地左转背离墙
+      （"阳角直接离开"）。评估回报 0713_1 的 103~174 掉到 60~120。
+      现触发条件收窄为【正前 ±65° 锥】：凸块首触方位角（6cm 凸出 ≈-46°、
+      12cm ≈-22°）都在锥内，平墙侧蹭/包边蹭角（≈-90°）被排除。
 
 终止：翻车 / 弹飞 / 出界 / 持续蹭墙 / 丢墙超时（首次捕获前有更长宽限；
       正在桥接缺口时不按丢墙终止）。
@@ -143,16 +152,27 @@ class WallFollowTask(object):
     PROT_PROB = 0.25         # 每条课程放一个浅凸块的概率（frac>0.2 开启）
     PROT_JUT_MIN = 0.02      # 凸出量下限 (m)
     PROT_JUT_MAX = 0.12      # 凸出量上限 (m，随课程渐进），= ridge02 横向半宽 ×2
-    # 机身前半接触 -> 前向激光注入该距离的虚拟回波（"保险杠 = 0 距离前障"）。
-    # 盲区障碍唯一的感知途径是碰撞；把碰撞翻译成"前方 1cm 处突然出现墙"，
-    # 策略直接复用已训练成熟的 head_on/内角反射（刹停 -> 原地左转 -> 侧激光
-    # 贴上新面 -> 沿边），无需为碰撞发明新技能：approach 由此在碰撞时生效
+    # 保险杠碰撞 -> 正前 BUMP_ECHO_DIST 处记一面【虚拟墙】（世界系平面），
+    # 之后每步按真实射线几何计算前向激光对它的读数（真机 = 碰撞事件写进
+    # 局部地图）。盲区障碍唯一的感知途径是碰撞；碰撞瞬间策略看到"前方 1cm
+    # 有墙"，原地左转中读数按内角同款几何增长、~48° 后自然消失 —— 观测
+    # 分布与真实内角完全一致，直接复用成熟的 head_on/内角反射（刹停 ->
+    # 原地左转 -> 侧激光贴上新面 -> 沿边）：approach 由此在碰撞时生效
     # （顶墙前推吃重罚），wobble 的 front 门控自动放开转向（front 有回波时
     # 本就不罚偏航）。取值 = FRONT_STOP_GAP，即"已到停止线"。
-    # ——替代 0714 版的"碰撞期免罚偏航 0.6s 宽限"：那版把接触常态化
-    # （wobble 豁免 + 35% 课程必撞），重训后碰撞卫生反而崩了（家居回放
-    # 5/5 死于顶墙推压 scraping、凸块处 47 次往复不得脱身），已删除。
+    # ——0714_1 教训：纯"接触期注入"在机身弹开的瞬间回波就消失（真实内角
+    # 的回波要持续到转过 ~48°），反射走不完、来回碰撞复发；且触发条件是
+    # 整个前半圆（±90°），贴边常态侧蹭也被翻译成"正面撞墙"，重训后策略
+    # 学到"贴墙危险"、普通场景不再沿边。见 BUMP_CONE_HALF_DEG。
     BUMP_ECHO_DIST = FRONT_STOP_GAP
+    # 保险杠触发锥（正前 ±65°）：接触点方位角在锥内才算"正面碰撞"。
+    # 几何依据（贴边 1cm、底盘半径 0.175）：凸块首触方位角 = asin((0.185-jut)/0.175)
+    # —— 凸出 12cm ≈ ±22°、6cm ≈ ±46°、3cm ≈ ±62°，都在锥内；
+    # 平墙侧蹭 / 阳角包边蹭角 ≈ ±90°，被排除（这类接触只吃 scrape，
+    # 不得触发"正面有墙"反射 —— 0714_1 全面回退的根因）。
+    BUMP_CONE_HALF_DEG = 65.0
+    # 虚拟墙寿命 (s)：兜底清理（正常情况下转向中读数超量程/越过平面就失效）。
+    BUMP_WALL_TTL = 2.0
     # 倒车贴边分门控：fwd>=0 全额发放、<= -REV_TRACK_SCALE 全扣（线性过渡）。
     # 见文件头"防往复极限环"注释；0.06m/s 取"内角刹停微倒冲(~0.03)只扣一半、
     # 有意倒车(>=0.1) 必然全扣"之间。
@@ -198,9 +218,12 @@ class WallFollowTask(object):
         self.acquired = False
         self.contact_belly = 0.0
         self.contact_dir = 0.0    # 接触方位 +1左/-1右/0无（观测用）
-        self.contact_front = 0.0  # 接触是否在前半机身（虚拟前向回波触发用）
+        self.contact_front = 0.0  # 接触是否在正前 ±65° 保险杠锥内（虚拟墙触发用）
         self.contact_lwheel = 0.0
         self.contact_rwheel = 0.0
+        self.bump_wall = None     # 保险杠虚拟墙 (平面上一点 q, 法线 n)，世界系
+        self.bump_age = 0.0       # 虚拟墙年龄 (s)，超 BUMP_WALL_TTL 兜底清理
+        self.bump_echo = None     # 本步虚拟墙回波 (距离, 置信度)，供 env 观测注入
 
     # ------------------------------------------------------------------
     # 工具函数
@@ -245,15 +268,35 @@ class WallFollowTask(object):
                 return True
         return False
 
+    def _bump_wall_range(self, pos_xy, heading):
+        """前向激光射线到保险杠虚拟墙平面的距离；失效返回 None。
+
+        射线起点 = 机身前缘（与真实前向激光 site 一致：中心 + 半径×航向），
+        方向 = 航向。失效条件：射线背向/平行平面（已转过 90°），或机身
+        前缘已越到平面另一侧（穿过/绕过了凸块所在位置）。
+        原地左转时读数 = 0.185/cosθ − 0.175（θ 为转过角度），~48° 超出
+        量程自然消失 —— 与真实内角一模一样的几何。
+        """
+        q, n = self.bump_wall
+        o = np.asarray(pos_xy) + heading * self.CHASSIS_RADIUS
+        denom = float(heading.dot(n))
+        if denom > -1e-6:                       # 背向/平行平面
+            return None
+        if float((o - q).dot(n)) < 0.0:         # 已越过平面
+            return None
+        return float((q - o).dot(n)) / denom
+
     def _chassis_contact(self):
         """机身壳体与任何物体接触 —— 蹭墙/顶死的信号。
 
-        返回 (是否接触, 接触方位, 是否前半)：
+        返回 (是否接触, 接触方位, 是否正面)：
           方位 = 接触点均值在机体系下的横向符号，+1 左 / -1 右（墙侧）/ 0 无；
-          前半 = 接触点均值在机体系 x>0（保险杠区）。浅凸起（凸出 < 18.5cm）
-        处于双激光盲区、只能靠碰撞感知：方位告诉策略"撞的是哪边肩"，
-        前半标志用于把碰撞翻译成前向激光的虚拟回波（见 step 与 BUMP_ECHO_DIST）
-        —— 对应真机保险杠触发。
+          正面 = 接触点均值方位角在正前 ±BUMP_CONE_HALF_DEG(65°) 锥内
+                 （保险杠触发区）。浅凸起（凸出 < 18.5cm）处于双激光盲区、
+        只能靠碰撞感知：方位告诉策略"撞的是哪边肩"，正面标志触发虚拟墙
+        （见 step 与 BUMP_ECHO_DIST）—— 对应真机保险杠触发。
+        贴边巡航的常态侧蹭 / 阳角包边蹭角（方位角≈±90°）不在锥内，
+        只按 scrape 处理 —— 0714_1 把它们也当"正面撞墙"导致全面回退。
         """
         model = self._client.model
         data = self._client.data
@@ -269,7 +312,9 @@ class WallFollowTask(object):
         rel = np.mean(pts, axis=0) - pos[0:2]
         lat = -np.sin(yaw) * rel[0] + np.cos(yaw) * rel[1]   # 机体系 y 分量
         lon = np.cos(yaw) * rel[0] + np.sin(yaw) * rel[1]    # 机体系 x 分量
-        return 1.0, (1.0 if lat > 0.0 else -1.0), (1.0 if lon > 0.0 else 0.0)
+        # 方位角在正前 ±65° 锥内 <=> lon > |lat| / tan(65°)
+        in_cone = lon > abs(lat) / np.tan(np.radians(self.BUMP_CONE_HALF_DEG))
+        return 1.0, (1.0 if lat > 0.0 else -1.0), (1.0 if in_cone else 0.0)
 
     # ------------------------------------------------------------------
     # 每个控制步推进任务状态（env.step 在 robot.step 之后调用）
@@ -298,17 +343,31 @@ class WallFollowTask(object):
         self.front_read = self.laser_front.read()
         self.side_read = self.laser_right.read()
 
-        # 机身前半碰撞 -> 前向激光注入 1cm 虚拟回波（保险杠语义，见
-        # BUMP_ECHO_DIST 注释）：盲区障碍（凸出<18.5cm 的壁柱/薄墙端面/
-        # 基站座体）撞上的瞬间，策略眼里等于"前方 1cm 突然出现墙"，直接
-        # 复用 head_on/内角的既有反射（刹停->左转->贴新面）；approach 与
-        # wobble 的 front 门控同步生效。奖励与观测（env.get_obs 同步注入）
-        # 都吃这个融合后的读数。
+        # 保险杠碰撞（正前 ±65° 锥内）-> 在正前 BUMP_ECHO_DIST(1cm) 处记一面
+        # 虚拟墙（世界系平面，真机 = 碰撞事件写入局部地图）。持续接触时每步
+        # 刷新（顶推期间恒读 1cm）；脱离后虚拟墙留在原地，前向读数随转向/
+        # 后退按真实射线几何演化 —— 与真实内角的观测分布一致，反射链
+        # （刹停 -> 原地左转 -> 贴新面）能完整走完，而不是接触一松回波就消失。
+        heading = np.array([np.cos(yaw_b), np.sin(yaw_b)])
         if self.contact_belly > 0.5 and self.contact_front > 0.5:
-            n = self.laser_front.num_rays
-            self.front_read = LaserReading(
-                distance=self.BUMP_ECHO_DIST, confidence=1.0, hit=True,
-                rays=np.full(n, self.BUMP_ECHO_DIST), hits=np.ones(n, dtype=bool))
+            edge = cur_xy + heading * self.CHASSIS_RADIUS
+            self.bump_wall = (edge + heading * self.BUMP_ECHO_DIST, -heading)
+            self.bump_age = 0.0
+
+        # 虚拟墙 -> 本步前向回波（几何射线求交；无效/超时则清理）
+        self.bump_echo = None
+        if self.bump_wall is not None:
+            self.bump_age += self._control_dt
+            d_virt = self._bump_wall_range(cur_xy, heading)
+            if self.bump_age > self.BUMP_WALL_TTL or d_virt is None:
+                self.bump_wall = None
+            elif d_virt < self.laser_front.max_range:
+                self.bump_echo = (float(d_virt), 1.0)
+                if (not self.front_read.hit) or d_virt < self.front_read.distance:
+                    n = self.laser_front.num_rays
+                    self.front_read = LaserReading(
+                        distance=float(d_virt), confidence=1.0, hit=True,
+                        rays=np.full(n, float(d_virt)), hits=np.ones(n, dtype=bool))
 
         if self.side_read.hit:
             self.lost_time = 0.0
@@ -493,9 +552,9 @@ class WallFollowTask(object):
         pos, (roll, pitch, yaw), up_z = self._base_pose()
         lost_limit = self.ACQUIRE_GRACE if not self.acquired else self.LOST_TERM_TIME
         if self.home_scene:
-            # 家居回放宽限 ×4（原 ×2）：从基站到隔断的全盲直行 ~2.4m
-            # （V_DES=0.28 下 ~9s），×4 给"起步慢/弧线巡航"留足余量，
-            # 避免在即将到墙前误杀回合。
+            # 家居回放宽限 ×4：现出生已贴墙（不再有长距离全盲找墙段），
+            # 保留放宽是为门洞/家具轮廓等大跨度丢墙段留余量，避免回放中
+            # 在包边/穿门洞途中误杀回合。
             lost_limit *= 4.0
         conditions = {
             "flipped": (up_z < 0.4) or (abs(roll) > 1.0) or (abs(pitch) > 1.2),
@@ -517,6 +576,9 @@ class WallFollowTask(object):
         self.contact_time = 0.0
         self.contact_dir = 0.0
         self.contact_front = 0.0
+        self.bump_wall = None
+        self.bump_age = 0.0
+        self.bump_echo = None
         self.acquired = False
         self.world_vel_xy = np.zeros(2)
         self.yaw_rate = 0.0
@@ -536,15 +598,18 @@ class WallFollowTask(object):
         if self.home_scene:
             self._bury_all_boxes()
             self.course = []
-            # 出生在回充基站正前方、紧贴 8mm 底板前缘（底板前伸到 x=-0.835，
-            # 机身后缘留 2cm：x = -0.835 + 0.175 + 0.02）。
-            # 不能骑在底板上出生：底板宽 26cm < 轮距 30cm，机器人在底板上时
-            # 前/后万向球压板把机身架起、两驱动轮悬空失去抓地 —— 实测满力矩
-            # 前进/原地转 2s 位移与偏航都是 0（高位架空死局），这正是"出生后
-            # 困在基站附近几秒、然后暴力甩出"的根因。
-            # 朝向 +x 背离基站（基站靠西墙）驶出，±0.15rad 微扰覆盖真机出站
-            # 的朝向误差；出生即刻就能满抓地直行找墙。
-            self.robot_init = (-0.64, 0.70, 0.05, np.random.uniform(-0.15, 0.15))
+            # 出生即贴墙（2026-07-14 按用户要求降难度）：不再从房间中央/基站
+            # 前找墙，直接出生在【西墙边、沿墙姿态】—— 右侧激光贴墙 1~3cm、
+            # 朝向 -y（沿墙向，墙在右侧、绕房间逆时针），出生瞬间就处于
+            # 沿边状态，验证的就是纯"沿边+过角"能力。
+            # 位置：西墙内侧面 x=-1.175，机身中心 x = -1.175 + 0.175 + d0；
+            # y 取基站（y∈[0.57,0.83]）南侧 0.20~0.45，与基站/净化器
+            # （y∈[-1.55,-1.35]）都不重叠，出发先沿西墙直行 ~1.6m。
+            d0 = np.random.uniform(0.01, 0.03)
+            self.robot_init = (-1.175 + 0.175 + d0,
+                               np.random.uniform(0.20, 0.45),
+                               0.05,
+                               -np.pi / 2.0 + np.random.uniform(-0.08, 0.08))
         else:
             self._build_random_course(frac)
 

@@ -1,11 +1,13 @@
 import os
 import sys
 import argparse
-import ray
 from functools import partial
 
 import numpy as np
+# 注意：torch 必须在 ray 之前 import —— RL312（py3.12 + ray 2.40 + torch 2.12
+# Windows）下先 import ray 会让 torch 的 c10.dll 初始化失败（WinError 1114）。
 import torch
+import ray
 import pickle
 
 from envs.jvrc import JvrcArmEnv
