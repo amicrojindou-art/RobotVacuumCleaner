@@ -149,3 +149,8 @@ python scripts/debug_wallfollow.py --path experiments/vacuum_wf0715 --home   # �
 nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0715_1 --n_itr 1500 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0715_1.log 2>&1 &
 
 tail -f train_vacuum_wf0715_1.log
+
+第三次训练
+nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0715_2 --n_itr 1000 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0715_2.log 2>&1 &
+
+tail -f train_vacuum_wf0715_2.log
