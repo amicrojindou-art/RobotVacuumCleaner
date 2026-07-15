@@ -32,6 +32,21 @@
     前向激光在训练里从没被用于刹车）；
   - 阳角（外角）包边窗口：右墙"刚"丢 + 前方无障碍时，鼓励先直行越过墙角
     再右转找墙，避免急着右勾把外露墙角勾进机身右前缘（"卡进机身"）；
+  - 阳角【虚拟贴边分】（0715_1 修复，照搬缺口桥接的成功做法）：包边圆弧
+    途中侧激光必然无回波，track=0 —— "紧贴墙角转弯"全程零收入，唯一的
+    回报是包完之后的贴墙收入，信号太远太稀。0714~0715_1 四次从头重训全部
+    学成"胆小浅弧"（丢墙后右转方向对、但 2s 只转 ~13°，够不到 10cm 量程，
+    终被丢墙超时终止 —— 回合平均 ~350 步就死、总回报塌掉的直接原因；
+    0713_1 能学会属于幸运收敛）。修复：训练时阳角顶点是课程真值
+    （self.wrap_corners），侧激光丢墙且在顶点 0.45m 内时，按贴墙同一公式
+    对"机身中心到顶点距离 = 半径+1cm"发虚拟贴边分 —— 紧贴包边圆弧
+    全程拿 track，与贴直墙连续，"紧贴转弯"有了直接正梯度。包边中转向
+    免罚（wobble steady=0，含超过 1.2s 宽限的慢包边 —— 旧版宽限一过，
+    包边圆弧的 1.5rad/s 转向会掉进 seek 防打转罚里挨 -0.24/步）。
+    家居回放无课程真值，该分支自动关闭（同缺口桥接）；
+  - 阳角速成课程（corner drill，30% 回合）：首段用短墙（0.9m）且强制
+    第一个过渡为拐角、70% 是阳角 —— 出生 ~2s 内就进入包边练习，
+    从课程第 0 迭代开始密集采样（此前包边样本只能等课程随机撒）；
   - wobble（直行段抖动抑制）：贴边良好且前方无障碍时惩罚偏航角速度，
     压住"沿墙一直摇晃"的极限环；用 track + 前方无障碍双重门控，不误伤拐弯；
   - 缺口桥接（门洞/断墙）：连续墙上留出一段两端共线、中间无墙的缺口，
@@ -147,8 +162,15 @@ class WallFollowTask(object):
     # 横向中心 x=0，首触点在右前肩 x≈+0.12，首触时侧激光还在凸块上游）——
     # 只能靠碰撞感知。0713_1 实测撞凸块后来回碰撞 28~56 次、绕过要 7~11s。
     # 凸块课程密度压到 0.15（0714/0715 曾用 0.25~0.35：必撞回合太密，
-    # 碰撞卫生与包边行为都被带坏 —— 见文件头"重要教训"）
-    PROT_PROB = 0.15         # 每条课程放一个浅凸块的概率（frac>0.2 开启）
+    # 碰撞卫生与包边行为都被带坏），且推迟到 frac>0.6 才开启（0715_1 教训：
+    # 凸块回合里"果断右转贴回墙"会随机撞上盲区凸块吃罚，包边技能在成形期
+    # 就被毒害 —— 对照：唯一没有凸块课程的 0713_1 包边 30/39，四个带凸块
+    # 课程的从头重训全部 <10/35。先固化包边，再学撞凸块的处置）
+    PROT_PROB = 0.15         # 每条课程放一个浅凸块的概率（frac>0.6 开启）
+    # 阳角包边虚拟贴边分：搜索包边顶点的半径（包边圆弧半径 0.185 + 裕量）
+    WRAP_CORNER_RANGE = 0.45
+    # 阳角速成课程占比：首段短墙 + 强制首过渡为拐角（70% 阳角）
+    CORNER_DRILL_PROB = 0.30
     PROT_JUT_MIN = 0.02      # 凸出量下限 (m)
     PROT_JUT_MAX = 0.12      # 凸出量上限 (m，随课程渐进），= ridge02 横向半宽 ×2
     # 保险杠正面锥（正前 ±65°）：接触点方位角在锥内才算"正面顶推"，
@@ -195,6 +217,8 @@ class WallFollowTask(object):
         self.gaps = []            # [(near_jamb_xy, dir_unit, width)] 墙体缺口（真值）
         self.bridging = False     # 当前是否正在直行桥接某个缺口
         self.bridge_lat_err = 0.0 # 桥接时机身右缘到"墙线延长线"1cm 目标的偏差 (m)
+        self.wrap_corners = []    # [xy] 阳角顶点（课程真值），包边虚拟贴边分用
+        self.wrap_err = None      # 本步包边贴边偏差 |到顶点距离-(半径+1cm)|；无=None
 
         # 运行时状态
         self.prev_xy = np.zeros(2)
@@ -313,6 +337,16 @@ class WallFollowTask(object):
         self.front_read = self.laser_front.read()
         self.side_read = self.laser_right.read()
 
+        # 阳角包边虚拟贴边（课程真值，见文件头）：侧激光丢墙且在某个阳角
+        # 顶点 WRAP_CORNER_RANGE 内 -> 计算与"包边圆弧"（到顶点距离 =
+        # 半径+1cm）的偏差，calc_reward 按贴墙同一公式发虚拟 track。
+        # 家居回放 wrap_corners 为空，恒为 None。
+        self.wrap_err = None
+        if (not self.side_read.hit) and self.wrap_corners:
+            dmin = min(float(np.linalg.norm(cur_xy - c)) for c in self.wrap_corners)
+            if dmin < self.WRAP_CORNER_RANGE:
+                self.wrap_err = abs(dmin - (self.CHASSIS_RADIUS + self.TARGET_DIST))
+
         if self.side_read.hit:
             self.lost_time = 0.0
             self.acquired = True
@@ -351,6 +385,12 @@ class WallFollowTask(object):
             lost = 0.0
         elif self.bridging:
             track_raw = np.exp(-self.bridge_lat_err / 0.008)
+            lost = 1.0
+        elif self.wrap_err is not None:
+            # 阳角包边虚拟贴边分（课程真值顶点，见文件头）：紧贴包边圆弧
+            # （到顶点距离 = 半径+1cm）全程拿 track，与贴直墙连续 ——
+            # "紧贴转弯"有直接正梯度，胆小浅弧/直行飘走拿不到。
+            track_raw = np.exp(-self.wrap_err / 0.008)
             lost = 1.0
         else:
             track_raw = 0.0
@@ -401,9 +441,14 @@ class WallFollowTask(object):
             # "直行"的奖励几乎无差（转圈不吃任何罚、直行只多 0.2 档速度分）。
             progress *= 0.5
             seek_blind = True
+        elif self.wrap_err is not None and front_clear:
+            # 阳角包边（有课程真值顶点）：progress 门控与贴墙同式（用虚拟
+            # track_raw），紧贴圆弧才拿满速度分；丢墙罚同包边窗口减轻。
+            progress *= (0.25 + 0.75 * track_raw)
+            lost *= 0.3
         elif self.lost_time < self.WRAP_GRACE_TIME and front_clear:
-            # 阳角（外角）包边窗口：右墙"刚"丢 + 正前方无障碍 —— 典型外角信号。
-            # 此时鼓励【先直行越过墙角】、并减轻丢墙焦虑，避免策略急着右勾
+            # 阳角（外角）包边窗口（无真值顶点时的兜底，如刚出包边搜索半径）：
+            # 鼓励【先直行越过墙角】、并减轻丢墙焦虑，避免策略急着右勾
             # 把外露的墙角勾进机身右前缘（"卡进机身"）。越过墙角后再转右找墙。
             progress *= 0.6
             lost *= 0.3
@@ -439,11 +484,14 @@ class WallFollowTask(object):
         scrape = self.contact_belly
 
         # 5b) press 顶推罚（保险杠"刹车老师"，纯奖励层）：正面锥（±65°）内
-        #     接触且还在前进 -> 罚前向速度。盲区凸起撞上后唯一正确的第一
-        #     反应是"停止前推"，此前该教学信号缺失（approach 由前向激光
-        #     触发，盲区碰撞时前向无回波）。侧蹭/包边蹭角（≈±90°）不罚，
-        #     倒车脱离不罚（max(fwd,0)）。
-        press = self.contact_belly * self.contact_front * max(fwd_vel, 0.0) / self.V_DES
+        #     接触、侧激光仍读墙（贴边巡航中撞上盲区凸起的特征状态）且还在
+        #     前进 -> 罚前向速度。盲区凸起撞上后唯一正确的第一反应是"停止
+        #     前推"，此前该教学信号缺失（approach 由前向激光触发，盲区碰撞
+        #     时前向无回波）。侧蹭/包边蹭角（≈±90°）不罚；包边中蹭角时侧
+        #     激光已丢墙，side.hit 门控保证不误伤（0715_1 教训：包边期任何
+        #     额外惩罚都会把策略推向"胆小浅弧"）；倒车脱离不罚（max(fwd,0)）。
+        press = (self.contact_belly * self.contact_front *
+                 (1.0 if side.hit else 0.0) * max(fwd_vel, 0.0) / self.V_DES)
 
         # 6) 直行段抖动抑制：贴边良好（track->1）且前方无障碍时，惩罚机体偏航
         #    角速度，压住"沿墙一直摇晃"的极限环。拐角需要转向，用 track 与
@@ -459,6 +507,12 @@ class WallFollowTask(object):
             steady, yaw_scale, wob_cap = track_raw, self.TRACK_YAW_SCALE, self.TRACK_WOB_CAP
         elif self.bridging:
             steady, yaw_scale, wob_cap = 1.0, self.YAW_RATE_SCALE, 1.0
+        elif self.wrap_err is not None and self.acquired:
+            # 阳角包边中转向免罚（含超过 1.2s 宽限的慢包边）：包边圆弧本身
+            # 就需要 ~1.5rad/s 的持续右转，旧版宽限一过就掉进 seek 防打转罚
+            # （-0.24/步）—— 慢包边被罚成"不敢包"。真值顶点在 + 已捕获过墙
+            # 才免（全盲找墙阶段在墙端附近仍吃 seek 防打转罚），不开洞。
+            steady, yaw_scale, wob_cap = 0.0, self.YAW_RATE_SCALE, 1.0
         elif seek_blind:
             # 盲区巡航（首次找墙 / 丢墙重找）防打转：全盲时旋转对 10cm 量程
             # 的激光毫无侦察价值，惩罚偏航角速度，让"径直巡航"成为唯一高收益
@@ -537,6 +591,8 @@ class WallFollowTask(object):
         self.gaps = []
         self.bridging = False
         self.bridge_lat_err = 0.0
+        self.wrap_corners = []
+        self.wrap_err = None
 
         # 传感器噪声课程：0 -> 2mm
         self.sensor_noise = 0.002 * frac
@@ -574,9 +630,18 @@ class WallFollowTask(object):
         """
         self._bury_all_boxes()
         self.course = []
+        self.wrap_corners = []
 
         n_seg = 1 + np.random.randint(0, 2 + int(round(3 * frac)))   # 1~2 -> 1~5
         n_seg = min(n_seg, self._num_boxes)
+
+        # 阳角速成课程（corner drill）：首段用短墙（box05/06，0.9m）且强制
+        # 第一个过渡为拐角、70% 为阳角 —— 出生 ~2s 内即进入包边练习。
+        # 0714~0715_1 的包边样本只能等课程随机撒（首段长墙 1.6m，且过渡还
+        # 可能是缺口/U 型），密度不足以在毒化梯度下学出"果断紧贴包边"。
+        drill = np.random.rand() < self.CORNER_DRILL_PROB
+        if drill:
+            n_seg = max(n_seg, 2)
 
         # 出生模式：大部分贴墙起步；一部分远离墙起步（找墙课程）。
         # 远离墙起步里再分出"正对墙面"的头对头模式：机器人朝墙（+y）出发，
@@ -613,10 +678,11 @@ class WallFollowTask(object):
             d0 = np.random.uniform(0.02, 0.04 + 0.05 * frac)
             start_yaw = np.random.uniform(-1.0, 1.0) * (0.10 + 0.25 * frac)
 
-        # 墙块顺序：首段用长块（保证出生点在墙侧旁），其余随机
+        # 墙块顺序：首段用长块（保证出生点在墙侧旁）；drill 回合首段改用
+        # 短块（box05/06，0.9m），出生后 ~0.5m 就到墙端拐角
         model = self._client.model
         names = ['box' + repr(i + 1).zfill(2) for i in range(self._num_boxes)]
-        first = names.pop(np.random.randint(2))     # box01/box02 是长块
+        first = names.pop(np.random.randint(4, 6) if drill else np.random.randint(2))
         np.random.shuffle(names)
         order = [first] + names
 
@@ -626,10 +692,10 @@ class WallFollowTask(object):
         gap_max = self.GAP_MAX_BASE + 0.15 * frac
         # 墙端 U 型包边课程：拐角热身后（frac>0.25）开启。
         uturn_on = frac > 0.25
-        # 浅凸起课程（frac>0.2 开启，每条课程最多一个）：凸出墙面 2~12cm 的
-        # 短凸块（壁柱/薄墙端面/基站座体），处于双激光盲区、只能靠碰撞感知，
-        # 教"右前肩碰撞 -> 立即左转绕行 -> 贴凸块面 -> 外角包边回原墙"。
-        prot_on = frac > 0.2
+        # 浅凸起课程（frac>0.6 才开启，每条课程最多一个）：凸出墙面 2~12cm
+        # 的短凸块（壁柱/薄墙端面/基站座体），处于双激光盲区、只能靠碰撞感知。
+        # 必须等包边技能固化后再引入 —— 见 PROT_PROB 注释（0715_1 教训）。
+        prot_on = frac > 0.6
         prot_placed = False
 
         p = np.array([-0.4, -(0.175 + d0)])  # 墙内侧面折线起点（机器人右侧）
@@ -680,30 +746,41 @@ class WallFollowTask(object):
                         self.course.append((p_center.copy(), 0.60, 0.10, seg_yaw))
                         prot_placed = True
 
-            # ---- 段间过渡：缺口（共线续墙）/ 墙端 U 型包边 / 拐角，三选一 ----
+            # ---- 段间过渡：缺口（共线续墙）/ 墙端 U 型包边 / 拐角，三选一。
+            #      drill 回合的首个过渡强制为拐角（70% 阳角）。 ----
             p = seg_start + d * L
             prev_gap = False
-            if gaps_on and i < n_seg - 1 and np.random.rand() < self.GAP_PROB:
+            force_corner = drill and i == 0
+            if (not force_corner) and gaps_on and i < n_seg - 1 \
+                    and np.random.rand() < self.GAP_PROB:
                 # 墙体缺口：保持墙向不变，跨过一段无墙缺口后续墙。记录真值供奖励。
                 g = float(np.random.uniform(self.GAP_MIN, gap_max))
                 self.gaps.append((p.copy(), d.copy(), g))
                 p = p + d * g
                 prev_gap = True
-            elif uturn_on and i < n_seg - 1 and np.random.rand() < self.U_TURN_PROB:
+            elif (not force_corner) and uturn_on and i < n_seg - 1 \
+                    and np.random.rand() < self.U_TURN_PROB:
                 # 墙端 U 型包边（门洞侧柱课程）：下一段贴着同一堵墙的【背面】
                 # 反向延伸、端面与本段对齐（跨过 2×半厚），机器人到墙端后需
                 # 连做两个右外角（合计≈180°）绕过墙端、再沿背面继续贴边 ——
                 # 正是家居场景"沿隔断走到门洞侧柱、拐进里屋"的动作。
                 # 训练墙厚 16cm、家居隔断 5cm，包边窗口逻辑一致，可泛化。
+                # 墙端两个阳角顶点都记入包边真值（内侧面端点 + 背面端点）。
+                self.wrap_corners.append(p.copy())
+                self.wrap_corners.append((p + normal * (2.0 * ht)).copy())
                 p = p + normal * (2.0 * ht)
                 d = -d
                 prev_gap = True   # 端面已对齐，下一段不做拐角回收（同缺口逻辑）
             else:
                 # 拐角：前期固定 90°，后期 55°~115°；墙在右侧时正角（逆时针）
-                # =内角（墙折向机器人前方）、负角=外角
+                # =内角（墙折向机器人前方）、负角=外角。drill 首过渡 70% 阳角。
                 ang = np.pi / 2 if frac < 0.3 else np.radians(np.random.uniform(55.0, 115.0))
-                if np.random.rand() < 0.5:
-                    ang = -ang
+                outer_p = 0.7 if force_corner else 0.5
+                if np.random.rand() < outer_p:
+                    ang = -ang          # 阳角（外角）
+                    # 阳角顶点 = 两段内侧面折线的交点 p（拐角回收只回收墙块
+                    # 摆放起点、不改内侧面所在直线），记入包边真值
+                    self.wrap_corners.append(p.copy())
                 c, s = np.cos(ang), np.sin(ang)
                 d = np.array([c * d[0] - s * d[1], s * d[0] + c * d[1]])
 
