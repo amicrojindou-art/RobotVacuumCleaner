@@ -169,3 +169,11 @@ nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum
 
 
 tail -f train_vacuum_wf0715_2c.log
+
+
+================================= 2026年072O训练===========================================
+问题描述：在0715_2c的训练完以后，拿actor_1999.pt进行家居场景和普通场景验证。发现正常沿边和阳角转弯都没有问题
+        但是当出现前方堵死，前激光畅通的场景时 会出现原地前后移动的问题 。具体见CHANGELOG.md
+
+
+nohup python -u run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0720 --continued experiments/vacuum_wf0715_2c/actor_1999.pt --n_itr 2000 --lr 3e-5 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0720.log 2>&1 &
