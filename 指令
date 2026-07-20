@@ -154,3 +154,10 @@ tail -f train_vacuum_wf0715_1.log
 nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0715_2 --n_itr 1000 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0715_2.log 2>&1 &
 
 tail -f train_vacuum_wf0715_2.log
+
+目前train_vacuum_wf0715_2效果比较好，可以满足初步使用
+
+第四次训练
+nohup python run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0715_3 --n_itr 1000 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0715_3.log 2>&1 &
+
+tail -f train_vacuum_wf0715_3.log
