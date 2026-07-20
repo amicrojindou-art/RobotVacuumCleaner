@@ -166,10 +166,14 @@ class WallFollowTask(object):
     # 凸块回合里"果断右转贴回墙"会随机撞上盲区凸块吃罚，包边技能在成形期
     # 就被毒害 —— 对照：唯一没有凸块课程的 0713_1 包边 30/39，四个带凸块
     # 课程的从头重训全部 <10/35。先固化包边，再学撞凸块的处置）
-    PROT_PROB = 0.0          # 每条课程放一个浅凸块的概率（frac>0.6 开启）
-                             # 2026-07-17 置 0：本轮在 0715_2 基础上精修包边
-                             # （_3 定案凸块毒化包边），凸块处置留待单独攻关，
-                             # 恢复时改回 0.15
+    PROT_PROB = 0.15         # 每条课程放一个盲区障碍的概率（frac>0.6 开启）
+                             # 2026-07-17 置 0：在 0715_2 基础上精修包边
+                             # （_3 定案凸块毒化包边），凸块处置留待单独攻关。
+                             # 2026-07-20 恢复 0.15：_2c 精修完成、包边/阳角
+                             # 已固化（实测流畅），按既定路线开启盲区障碍攻关；
+                             # 并新增"薄墙拦路窄缝"变体（见 _build_random_course），
+                             # 覆盖 _2c 实测空洞：正前被薄墙堵死 + 前激光穿缝 +
+                             # 侧墙仍在 -> 双转弯反射都不触发、原地往复极限环。
     # 阳角包边虚拟贴边分：搜索包边顶点的半径（包边圆弧半径 0.185 + 裕量）
     WRAP_CORNER_RANGE = 0.45
     # 阳角速成课程占比：首段短墙 + 强制首过渡为拐角（70% 阳角）
@@ -729,25 +733,52 @@ class WallFollowTask(object):
             self._mocap_place(name, [center[0], center[1], h - hz], seg_yaw)
             self.course.append((center.copy(), L, h, seg_yaw))
 
-            # ---- 浅凸起：ridge02 转 90°（60cm 沿墙 × 12cm 垂直墙），大部分
-            #      沉进墙体、只凸出 jut；离段两端 >=0.55m（半长 0.30 + 拐角
-            #      裕量 0.25），离出生点 >0.6m。10cm 高 -> 四条激光射线全命中，
-            #      绕行时凸块面可正常贴边。 ----
+            # ---- 盲区障碍（frac>0.6，每条课程最多一个，两变体各半）。共性：
+            #      前激光零预警、只能靠碰撞感知；正确处置同构 —— 接触后向左
+            #      让出、待侧激光捕获障碍面，其余复用既有沿边/包边技能。
+            #      离段两端 >=0.55m（半长 0.30 + 拐角裕量 0.25），离出生点 >0.6m。 ----
             if prot_on and not prot_placed and np.random.rand() < self.PROT_PROB:
                 s_lo, s_hi = 0.55, L - 0.55
                 if s_hi > s_lo:
-                    # 凸出量随课程渐进：frac=0.2 时上限 ~4cm、满课程 12cm ——
-                    # 先学"轻碰浅凸起就绕"，再逐步加深
-                    jut_hi = self.PROT_JUT_MIN + (self.PROT_JUT_MAX - self.PROT_JUT_MIN) * frac
-                    jut = float(np.random.uniform(self.PROT_JUT_MIN, jut_hi))
                     s_c = float(np.random.uniform(s_lo, s_hi))
-                    p_center = seg_start + d * s_c + normal * (0.06 - jut)
-                    if float(np.linalg.norm(p_center)) > 0.60:
-                        self._mocap_place('ridge02',
-                                          [p_center[0], p_center[1], 0.05],
-                                          seg_yaw + np.pi / 2.0)
-                        self.course.append((p_center.copy(), 0.60, 0.10, seg_yaw))
-                        prot_placed = True
+                    if np.random.rand() < 0.5:
+                        # 变体 A —— 沿墙浅凸块（壁柱/门框边/基站座体）：ridge02
+                        # 转 90°（60cm 沿墙 × 12cm 垂直墙），大部分沉进墙体、只
+                        # 凸出 jut。凸出量随课程渐进：先学"轻碰浅凸起就绕"再加深。
+                        # 10cm 高 -> 四条激光射线全命中，绕行时凸块面可正常贴边。
+                        jut_hi = self.PROT_JUT_MIN + (self.PROT_JUT_MAX - self.PROT_JUT_MIN) * frac
+                        jut = float(np.random.uniform(self.PROT_JUT_MIN, jut_hi))
+                        p_center = seg_start + d * s_c + normal * (0.06 - jut)
+                        if float(np.linalg.norm(p_center)) > 0.60:
+                            self._mocap_place('ridge02',
+                                              [p_center[0], p_center[1], 0.05],
+                                              seg_yaw + np.pi / 2.0)
+                            self.course.append((p_center.copy(), 0.60, 0.10, seg_yaw))
+                            prot_placed = True
+                    else:
+                        # 变体 B —— 薄墙拦路窄缝（0719 _2c 回放实测空洞）：ridge02
+                        # 长轴垂直于墙横在巡航正前方，内端与所沿墙面留缝 g。
+                        # 缝宽推导（贴边 1cm、底盘半径 0.175）：前激光射线距墙
+                        # 0.185，g 下限 0.22 > 0.185 + 贴边摆动裕量 -> 射线必然
+                        # 穿缝（纯盲）；机身横跨距墙 0.01~0.36m，g 上限 0.32 ->
+                        # 与机身至少 4cm 重叠（必然接触，且缝窄于机身钻不过去）。
+                        # 侧激光此时仍照着原墙 —— 阴角（前激光缩短）/阳角（侧激光
+                        # 丢墙）两套反射都不触发，唯一线索是机身接触，逼策略学出
+                        # "正前盲堵 -> 左转贴拦路墙续边"而不是原地往复。拦路墙
+                        # 外端两个阳角顶点记入包边真值（同 U 型墙端逻辑），绕过
+                        # 端头后沿背面回到原墙、阴角续边，全程复用既有技能。
+                        g = float(np.random.uniform(0.22, 0.32))
+                        b_center = seg_start + d * s_c - normal * (g + 0.30)
+                        if float(np.linalg.norm(b_center)) > 0.60:
+                            self._mocap_place('ridge02',
+                                              [b_center[0], b_center[1], 0.05],
+                                              seg_yaw)
+                            self.course.append((b_center.copy(), 0.60, 0.10,
+                                                seg_yaw + np.pi / 2.0))
+                            tip = seg_start + d * s_c - normal * (g + 0.60)
+                            self.wrap_corners.append((tip - d * 0.06).copy())
+                            self.wrap_corners.append((tip + d * 0.06).copy())
+                            prot_placed = True
 
             # ---- 段间过渡：缺口（共线续墙）/ 墙端 U 型包边 / 拐角，三选一。
             #      drill 回合的首个过渡强制为拐角（70% 阳角）。 ----
