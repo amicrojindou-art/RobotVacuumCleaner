@@ -196,9 +196,12 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self.task.reset(iter_count=self.robot.iteration_count)
 
         # 方案B 域随机化：每回合采样伺服增益/指令延迟/量程/轮速噪声，
-        # 覆盖真机速度环个体差异与执行延迟（sim2real 关键）。
+        # 覆盖真机速度环个体差异与执行延迟（sim2real 关键）。幅度随课程 frac
+        # 渐进（frac=0 名义值、frac=1 满随机），避免开局满噪声淹没策略。
         if hasattr(self.robot, 'randomize'):
-            self.robot.randomize()
+            frac = float(np.clip(self.robot.iteration_count / self.task.CURRICULUM_ITRS,
+                                 0.0, 1.0))
+            self.robot.randomize(frac)
 
         # 激光噪声由任务课程决定
         self.laser_front.noise_std = self.task.sensor_noise

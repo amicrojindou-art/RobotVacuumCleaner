@@ -117,16 +117,31 @@ class VacuumVelocityRobot(VacuumRobot):
         self._kp_eff = self.KP_SERVO
         self._vmax_eff = self.V_MAX_WHEEL
         self._delay = 0
+        self._wvel_noise = 0.0       # 本回合轮速噪声 σ（随课程展开）
         self._cmd_fifo = []          # 指令延迟 FIFO（存轮速目标 rad/s）
         self._w_set_prev = np.zeros(len(active))  # 斜率限幅用（上一步已发目标）
 
-    def randomize(self):
-        """reset 时由 env 调用，采样本回合的伺服/延迟/量程随机化。"""
-        lo, hi = self.KP_RAND
-        self._kp_eff = float(np.clip(self.KP_SERVO * np.random.uniform(lo, hi),
+    def randomize(self, frac=1.0):
+        """reset 时由 env 调用，采样本回合的伺服/延迟/量程随机化。
+
+        域随机化【课程】(2026-07-21 修复)：幅度随 frac 0->1 渐进展开。frac=0 时
+        全部取名义值（无随机化），让策略先在干净任务上学会基础沿边；frac=1 时
+        才拉满不确定性。与 task 的 sensor_noise/friction 课程同理。上一版
+        (vacuum_wf_vel0721) 从第0轮就满随机化，策略被噪声淹没学不出稳定映射、
+        ep_len 从514跌到310 —— 本修复的直接对象。
+        """
+        f = float(np.clip(frac, 0.0, 1.0))
+        # kp/vmax 范围从 [1,1] 渐开到全范围
+        kp_lo = 1.0 - (1.0 - self.KP_RAND[0]) * f
+        kp_hi = 1.0 + (self.KP_RAND[1] - 1.0) * f
+        self._kp_eff = float(np.clip(self.KP_SERVO * np.random.uniform(kp_lo, kp_hi),
                                      0.0, self.KP_CAP))
-        self._vmax_eff = self.V_MAX_WHEEL * float(np.random.uniform(*self.VMAX_RAND))
-        self._delay = int(np.random.randint(0, self.DELAY_MAX + 1))
+        vmax_lo = 1.0 - (1.0 - self.VMAX_RAND[0]) * f
+        vmax_hi = 1.0 + (self.VMAX_RAND[1] - 1.0) * f
+        self._vmax_eff = self.V_MAX_WHEEL * float(np.random.uniform(vmax_lo, vmax_hi))
+        # 延迟上限、轮速噪声随 frac 增长
+        self._delay = int(np.random.randint(0, int(round(self.DELAY_MAX * f)) + 1))
+        self._wvel_noise = self.WVEL_NOISE * f
         self._cmd_fifo = []
         self._w_set_prev = np.zeros(len(self.actuators))
 
@@ -161,7 +176,7 @@ class VacuumVelocityRobot(VacuumRobot):
             for dof, sign in self._brush_dofs:
                 self.client.data.qvel[dof] = sign * self.BRUSH_SPEED
             wv = np.asarray(self.client.get_act_joint_velocities())[self.actuators]
-            wv_meas = wv + np.random.normal(0.0, self.WVEL_NOISE, size=wv.shape)
+            wv_meas = wv + np.random.normal(0.0, self._wvel_noise, size=wv.shape)
             tau = np.clip(self._kp_eff * (w_active - wv_meas), self.tau_low, self.tau_high)
             self.client.set_motor_torque(tau)
             self.client.step()
