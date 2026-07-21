@@ -39,12 +39,17 @@ import os
 CHASSIS_RADIUS   = 0.175   # 底盘半径（直径 0.35m，与真机 Φ350mm 一致）
 TOTAL_HEIGHT     = 0.090   # 整机高度（雷达下降后 90mm，与真机一致）
 GROUND_CLEARANCE = 0.015   # 底盘底面离地间隙（决定多高的坎会"骑"住底盘）
-WHEEL_RADIUS     = 0.035   # 驱动轮半径
+WHEEL_RADIUS     = 0.037250  # 驱动轮半径（真机轮径 74.5mm/2，2026-07-21 对齐；
+                             # 小核 app_config.h WHEEL_DIA_MACHINE 74.5f）
 WHEEL_HALF_W     = 0.012   # 驱动轮半宽
-WHEEL_Y          = 0.150   # 轮子左右偏移（半轮距）
+WHEEL_Y          = 0.116   # 半轮距（真机轮距 232mm/2，2026-07-21 对齐；
+                           # 小核 WHEEL_LEFT_RIGHT_DISTANCE_MACHINE 232f。
+                           # 旧值 0.150 使仿真转向比真机慢 29%，是 RL 真机
+                           # 过度转向乱走的根因）
 CASTER_RADIUS    = 0.020   # 万向支撑球半径
 CASTER_X         = 0.140   # 万向球前后偏移
-CHASSIS_MASS     = 2.50    # 底盘质量（整机约 3kg）
+CHASSIS_MASS     = 2.40    # 底盘质量（整机约 2.9kg，2026-07-21 对齐真机；
+                           # 底盘2.40 + 2轮×0.20 + 2万向球×0.05 = 2.90kg）
 WHEEL_MASS       = 0.20    # 单个驱动轮质量
 CASTER_MASS      = 0.05    # 单个万向球质量
 MAX_WHEEL_TORQUE = 2.0     # 执行器力矩上限（ctrlrange）

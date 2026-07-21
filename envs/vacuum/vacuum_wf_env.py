@@ -80,7 +80,10 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self.task.laser_front = self.laser_front
         self.task.laser_right = self.laser_right
 
-        self.robot = vacuum_robot.VacuumRobot(
+        # 方案B（2026-07-21）：轮速动作机器人。动作=左右轮速目标系数∈[-1,1]，
+        # 内嵌 P 伺服模拟小核速度环，与真机 g_vels_shm 轮速接口天然一致。
+        # 力矩上限仍 ±MAX_WHEEL_TORQUE（伺服饱和=真机速度环深度饱和）。
+        self.robot = vacuum_robot.VacuumVelocityRobot(
             pdgains=None, dt=control_dt, active=self.actuators,
             client=self.interface, torque_scale=MAX_WHEEL_TORQUE)
 
@@ -191,6 +194,11 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
     # ------------------------------------------------------------------
     def reset_model(self):
         self.task.reset(iter_count=self.robot.iteration_count)
+
+        # 方案B 域随机化：每回合采样伺服增益/指令延迟/量程/轮速噪声，
+        # 覆盖真机速度环个体差异与执行延迟（sim2real 关键）。
+        if hasattr(self.robot, 'randomize'):
+            self.robot.randomize()
 
         # 激光噪声由任务课程决定
         self.laser_front.noise_std = self.task.sensor_noise

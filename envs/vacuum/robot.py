@@ -85,3 +85,88 @@ class VacuumRobot:
                 self.client.data.qvel[dof] = sign * self.BRUSH_SPEED
             self.client.set_motor_torque(torque)
             self.client.step()
+
+
+class VacuumVelocityRobot(VacuumRobot):
+    """方案B：动作 = 左右轮速目标系数 ∈ [-1,1]，×V_MAX_WHEEL 得轮速目标 (rad/s)。
+
+    真机大核对小核只有【轮速目标】通道（g_vels_shm：左右轮 mm/s，小核做电机
+    速度闭环），没有力矩/PWM 接口。让训练动作语义与真机接口天然一致：动作 =
+    轮速目标，仿真内嵌一个模拟小核电机速度环的低层 P 伺服 + 斜率限幅。
+    sim2real 差距从"整条力矩动力学链"缩小为"速度环响应差异"，后者用域随机化覆盖。
+
+    与真机几何绑定（2026-07-21 对齐）：
+      V_MAX_WHEEL = 真机 300mm/s ÷ 轮半径 0.037250m ≈ 8.05 rad/s
+      KP 稳定界   = (m/2)·r²/sim_dt = (2.9/2)·0.03725²/0.0025 ≈ 0.805，KP=0.5 安全
+    """
+
+    V_MAX_WHEEL = 8.05      # rad/s；×轮半径0.037250 = 0.30m/s = 真机 MAX_SPEED 300mm/s
+    KP_SERVO    = 0.5       # N·m/(rad/s)，模拟小核速度环 P 增益（名义值）
+    SLEW_RATE   = 40.0      # rad/s² 轮速目标斜率限幅（≈真机 g_vels_shm accels 语义）
+
+    # 域随机化范围（reset 时采样，覆盖真机速度环不确定性）
+    KP_RAND     = (0.6, 1.4)   # 伺服增益缩放；上限按稳定界 clip
+    KP_CAP      = 0.7          # kp_eff 硬上限（< 稳定界 0.805）
+    VMAX_RAND   = (0.95, 1.05) # 轮径磨损/打滑标定误差
+    DELAY_MAX   = 2            # 指令延迟最大控制步数（SPI-RPC 下发+小核执行，实测10~30ms）
+    WVEL_NOISE  = 0.1          # 轮速测量噪声 σ (rad/s)，编码器量化
+
+    def __init__(self, pdgains, dt, active, client, torque_scale=2.0):
+        super().__init__(pdgains, dt, active, client, torque_scale)
+        # 伺服 / 域随机化运行时状态
+        self._kp_eff = self.KP_SERVO
+        self._vmax_eff = self.V_MAX_WHEEL
+        self._delay = 0
+        self._cmd_fifo = []          # 指令延迟 FIFO（存轮速目标 rad/s）
+        self._w_set_prev = np.zeros(len(active))  # 斜率限幅用（上一步已发目标）
+
+    def randomize(self):
+        """reset 时由 env 调用，采样本回合的伺服/延迟/量程随机化。"""
+        lo, hi = self.KP_RAND
+        self._kp_eff = float(np.clip(self.KP_SERVO * np.random.uniform(lo, hi),
+                                     0.0, self.KP_CAP))
+        self._vmax_eff = self.V_MAX_WHEEL * float(np.random.uniform(*self.VMAX_RAND))
+        self._delay = int(np.random.randint(0, self.DELAY_MAX + 1))
+        self._cmd_fifo = []
+        self._w_set_prev = np.zeros(len(self.actuators))
+
+    def step(self, action):
+        # 1) 动作 clip 到 ±1（Gaussian 采样会越界；速度版必须显式 clip，
+        #    否则 V_MAX 失去意义。力矩版靠 ctrlrange 天然限幅，这里没有）
+        action = np.clip(np.asarray(action).flatten(), -1.0, 1.0)
+        w_set_raw = action * self._vmax_eff
+
+        # 2) 斜率限幅（真机小核有加速度限制；训练内置使策略学会平滑指令）
+        dmax = self.SLEW_RATE * self.control_dt
+        w_set = np.clip(w_set_raw, self._w_set_prev - dmax, self._w_set_prev + dmax)
+        self._w_set_prev = w_set.copy()
+
+        # 3) 指令延迟（FIFO）：本步目标入队，取延迟 self._delay 步前的目标执行
+        self._cmd_fifo.append(w_set.copy())
+        w_active = self._cmd_fifo[0] if len(self._cmd_fifo) > self._delay \
+            else np.zeros(len(self.actuators))
+        if len(self._cmd_fifo) > self._delay:
+            self._cmd_fifo.pop(0)
+
+        # 4) 记账（与基类一致）：last_* = 真正上一控制步，供奖励平滑/能耗项
+        self.last_action = action.copy() if self.prev_action is None else self.prev_action.copy()
+        self.last_torque = (self.prev_torque.copy() if self.prev_torque is not None
+                            else np.zeros(len(self.actuators)))
+
+        # 5) 内嵌 P 伺服子步循环：每子步按实测轮速算力矩（模拟小核速度环）。
+        #    堵转/顶墙时伺服饱和到 ±MAX_TAU，物理行为与真机速度环深度饱和一致，
+        #    "顶推过坎"能力仍可学到（只是通过速度指令表达）。
+        tau_accum = np.zeros(len(self.actuators))
+        for _ in range(self.frame_skip):
+            for dof, sign in self._brush_dofs:
+                self.client.data.qvel[dof] = sign * self.BRUSH_SPEED
+            wv = np.asarray(self.client.get_act_joint_velocities())[self.actuators]
+            wv_meas = wv + np.random.normal(0.0, self.WVEL_NOISE, size=wv.shape)
+            tau = np.clip(self._kp_eff * (w_active - wv_meas), self.tau_low, self.tau_high)
+            self.client.set_motor_torque(tau)
+            self.client.step()
+            tau_accum += tau
+
+        self.prev_action = action.copy()
+        self.prev_torque = tau_accum / self.frame_skip   # 本控制步伺服力矩均值（能耗项用）
+        return self.prev_torque

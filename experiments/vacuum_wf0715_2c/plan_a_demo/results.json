@@ -1,0 +1,189 @@
+{
+  "config": {
+    "checkpoint": "experiments/vacuum_wf0715_2c/actor.pt",
+    "episodes": 6,
+    "max_steps": 600,
+    "seed": 42,
+    "kp": 0.5,
+    "k_fb": 1.0,
+    "c_v": 0.5,
+    "c_w": 1.0,
+    "iz": null,
+    "save_obs": false,
+    "out_dir": null
+  },
+  "mass": 3.01,
+  "iz": 0.04609062499999999,
+  "episodes": [
+    {
+      "mode": "direct",
+      "episode": 0,
+      "return": 150.59,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.32,
+      "side_err_mean_mm": 10.4,
+      "side_err_median_mm": 3.6,
+      "side_engaged_ratio": 0.94,
+      "contact_ratio": 0.06
+    },
+    {
+      "mode": "direct",
+      "episode": 1,
+      "return": 191.84,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.36,
+      "side_err_mean_mm": 10.2,
+      "side_err_median_mm": 2.6,
+      "side_engaged_ratio": 0.98,
+      "contact_ratio": 0.0
+    },
+    {
+      "mode": "direct",
+      "episode": 2,
+      "return": 170.15,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 3.82,
+      "side_err_mean_mm": 2.2,
+      "side_err_median_mm": 1.4,
+      "side_engaged_ratio": 0.33,
+      "contact_ratio": 0.02
+    },
+    {
+      "mode": "direct",
+      "episode": 3,
+      "return": 81.22,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.04,
+      "side_err_mean_mm": null,
+      "side_err_median_mm": null,
+      "side_engaged_ratio": 0.0,
+      "contact_ratio": 0.07
+    },
+    {
+      "mode": "direct",
+      "episode": 4,
+      "return": 76.62,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.32,
+      "side_err_mean_mm": null,
+      "side_err_median_mm": null,
+      "side_engaged_ratio": 0.0,
+      "contact_ratio": 0.05
+    },
+    {
+      "mode": "direct",
+      "episode": 5,
+      "return": 191.85,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 3.67,
+      "side_err_mean_mm": 8.5,
+      "side_err_median_mm": 2.4,
+      "side_engaged_ratio": 0.33,
+      "contact_ratio": 0.01
+    },
+    {
+      "mode": "adapter",
+      "episode": 0,
+      "return": 80.04,
+      "steps": 512,
+      "terminated_early": true,
+      "dist_m": 3.78,
+      "side_err_mean_mm": 10.7,
+      "side_err_median_mm": 6.2,
+      "side_engaged_ratio": 0.83,
+      "contact_ratio": 0.13,
+      "servo_track_err_rad_s": 6.654
+    },
+    {
+      "mode": "adapter",
+      "episode": 1,
+      "return": 81.47,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.8,
+      "side_err_mean_mm": 10.9,
+      "side_err_median_mm": 5.9,
+      "side_engaged_ratio": 0.48,
+      "contact_ratio": 0.03,
+      "servo_track_err_rad_s": 7.128
+    },
+    {
+      "mode": "adapter",
+      "episode": 2,
+      "return": 12.3,
+      "steps": 544,
+      "terminated_early": true,
+      "dist_m": 4.69,
+      "side_err_mean_mm": 8.5,
+      "side_err_median_mm": 8.5,
+      "side_engaged_ratio": 0.65,
+      "contact_ratio": 0.07,
+      "servo_track_err_rad_s": 6.408
+    },
+    {
+      "mode": "adapter",
+      "episode": 3,
+      "return": -2.51,
+      "steps": 320,
+      "terminated_early": true,
+      "dist_m": 3.32,
+      "side_err_mean_mm": null,
+      "side_err_median_mm": null,
+      "side_engaged_ratio": 0.0,
+      "contact_ratio": 0.0,
+      "servo_track_err_rad_s": 4.854
+    },
+    {
+      "mode": "adapter",
+      "episode": 4,
+      "return": -7.78,
+      "steps": 320,
+      "terminated_early": true,
+      "dist_m": 3.37,
+      "side_err_mean_mm": null,
+      "side_err_median_mm": null,
+      "side_engaged_ratio": 0.0,
+      "contact_ratio": 0.0,
+      "servo_track_err_rad_s": 5.037
+    },
+    {
+      "mode": "adapter",
+      "episode": 5,
+      "return": 114.54,
+      "steps": 600,
+      "terminated_early": false,
+      "dist_m": 4.62,
+      "side_err_mean_mm": 9.5,
+      "side_err_median_mm": 7.0,
+      "side_engaged_ratio": 0.52,
+      "contact_ratio": 0.01,
+      "servo_track_err_rad_s": 7.422
+    }
+  ],
+  "summary": {
+    "adapter": {
+      "episodes": 6,
+      "return_mean": 46.34,
+      "return_std": 47.43,
+      "steps_mean": 482.7,
+      "early_term": 4,
+      "side_err_mean_mm": 9.9,
+      "contact_ratio_mean": 0.04
+    },
+    "direct": {
+      "episodes": 6,
+      "return_mean": 143.71,
+      "return_std": 47.93,
+      "steps_mean": 600.0,
+      "early_term": 0,
+      "side_err_mean_mm": 7.8,
+      "contact_ratio_mean": 0.04
+    }
+  }
+}
