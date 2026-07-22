@@ -201,3 +201,5 @@ tail -f train_vacuum_wf_vel0721b.log
 
 cd C:\Users\zhang\Desktop\code\backup\RobotVacuumCleaner
 nohup python -u run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0722 --n_itr 2000 --lr 1e-4 --entropy_coeff 0.01 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0722.log 2>&1 &
+
+tail -f train_vacuum_wf0722.log
