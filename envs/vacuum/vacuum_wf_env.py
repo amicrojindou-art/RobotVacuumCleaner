@@ -80,10 +80,11 @@ class VacuumWFEnv(mujoco_env.MujocoEnv):
         self.task.laser_front = self.laser_front
         self.task.laser_right = self.laser_right
 
-        # 方案B（2026-07-21）：轮速动作机器人。动作=左右轮速目标系数∈[-1,1]，
-        # 内嵌 P 伺服模拟小核速度环，与真机 g_vels_shm 轮速接口天然一致。
-        # 力矩上限仍 ±MAX_WHEEL_TORQUE（伺服饱和=真机速度环深度饱和）。
-        self.robot = vacuum_robot.VacuumVelocityRobot(
+        # 方案A（2026-07-22 回归）：力矩动作机器人。velocity 版(VacuumVelocityRobot)
+        # 两次重训均练不好(47% eng/18mm/大量早终止)，回归已验证的力矩训练+适配层
+        # 部署。过度转向真根因(几何)已由 gen_xml + 大核适配层 half_track 对齐修复。
+        # VacuumVelocityRobot 类保留在 robot.py 备查，未来可再攻关。
+        self.robot = vacuum_robot.VacuumRobot(
             pdgains=None, dt=control_dt, active=self.actuators,
             client=self.interface, torque_scale=MAX_WHEEL_TORQUE)
 
