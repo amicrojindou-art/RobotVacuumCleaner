@@ -199,7 +199,15 @@ tail -f train_vacuum_wf_vel0721b.log
 
 ================================= 2026年0722启动力矩重训（从头 + 新几何）===========================================
 
+
 cd C:\Users\zhang\Desktop\code\backup\RobotVacuumCleaner
-nohup python -u run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0722 --n_itr 2000 --lr 1e-4 --entropy_coeff 0.01 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0722.log 2>&1 &
+nohup python -u run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0722 --n_itr 1000 --lr 1e-4 --entropy_coeff 0.01 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0722.log 2>&1 &
 
 tail -f train_vacuum_wf0722.log
+
+为了节省时间，0722第一次训练只跑了1000次迭代。训练权重在实机验证可以做为一个初步demo。
+但是沿边过程中机身存在摇晃。为了解决摇晃问题，续训到 2000 完成课程，看看效果
+
+nohup python -u run_experiment.py train --env vacuum_wf --logdir experiments/vacuum_wf0722_b --n_itr 2000 --lr 1e-4 --entropy_coeff 0.01 --num_procs 12 --max_traj_len 600 --target_kl 0.04 --lr_decay --no_mirror --eval_freq 50 > train_vacuum_wf0722_b.log 2>&1 &
+
+tail -f train_vacuum_wf0722_b.log
